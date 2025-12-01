@@ -5,7 +5,6 @@ export default defineNuxtConfig({
 
   modules: [
     '@nuxt/image',
-    // '@nuxt/ui', // 已註解：需要 Nuxt 4.0.0，目前使用 Nuxt 3.20.1
     '@nuxt/test-utils',
     '@nuxt/eslint',
     'vuetify-nuxt-module'
