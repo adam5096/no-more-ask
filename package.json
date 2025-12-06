@@ -21,5 +21,8 @@
     "vue-router": "^4.6.3",
     "vuetify": "^3.11.0",
     "vuetify-nuxt-module": "^0.18.8"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.14.0"
   }
 }
