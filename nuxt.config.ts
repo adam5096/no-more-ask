@@ -11,6 +11,9 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss'
   ],
 
+  // 載入自訂 CSS 文件，確保設計 tokens 和 Tailwind 樣式被正確處理
+  css: ['~/assets/css/tailwind.css'],
+
   // Vuetify 配置（可選，模組已提供預設配置）
   vuetify: {
     moduleOptions: {
