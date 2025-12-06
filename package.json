@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:tokens": "style-dictionary build --config style-dictionary.config.mjs",
+    "predev": "pnpm build:tokens",
+    "prebuild": "pnpm build:tokens",
     "build": "nuxt build",
     "dev": "nuxt dev  --open",
     "generate": "nuxt generate",
@@ -23,6 +26,7 @@
     "vuetify-nuxt-module": "^0.18.8"
   },
   "devDependencies": {
-    "@nuxtjs/tailwindcss": "^6.14.0"
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "style-dictionary": "^5.1.1"
   }
 }

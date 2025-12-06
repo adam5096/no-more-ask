@@ -1,4 +1,6 @@
+/* Design Tokens - 由 Style Dictionary 自動生成 */
+@import './tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-

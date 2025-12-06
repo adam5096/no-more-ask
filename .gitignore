@@ -25,3 +25,6 @@ logs
 
 # MCP Configuration (contains API keys)
 .cursor/mcp.json
+
+# Generated Design Tokens
+assets/css/tokens.css
