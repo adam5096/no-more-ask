@@ -1,5 +1,4 @@
-/* Design Tokens - 由 Style Dictionary 自動生成 */
-@import './tokens.css';
+/* Design Tokens 已通過 nuxt.config.ts 載入，無需在此處再次導入 */
 
 @tailwind base;
 @tailwind components;

@@ -10,7 +10,7 @@
     "dev": "nuxt dev  --open",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "pnpm build:tokens && nuxt prepare"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
