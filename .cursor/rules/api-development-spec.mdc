@@ -1,0 +1,244 @@
+---
+alwaysApply: false
+---
+# API 開發規範
+
+簡短描述：本文件定義了完整的 API 開發流程，從需求確認到實作完成的全方位指南，包含 BFF 設計模式、CORS 處理、環境感知等最佳實踐。
+
+最後更新：2024-12-19
+
+---
+
+## 開發前確認事項
+
+在開發任何 API 前，必須向開發者確認以下資訊：
+
+### 1. API 端點規格
+- **API endpoint**: `baseURL + /api/v1/???`
+- **HTTP methods**: GET、POST、PUT、PATCH、DELETE
+- **Request body**: 以此做 TypeScript 型別規範的根據
+- **Response body**: 以此做 TypeScript 型別規範的根據（如欄位值留白，表示後端邏輯接受空值）
+
+### 2. 使用場景分析
+- **使用本資料的頁面或組件**
+- **API 的邏輯鍊條**：
+  - 從哪個位置（畫面、HTML）？
+  - 聽到哪個事件（trigger event）？
+  - 請求時要夾帶資料嗎（token, body）？要的話要帶哪些？
+  - 取回資料後保存到哪裡？誰要使用？讀取 & 使用方式？
+  - 回應完成後，是否需要路由導航？
+
+### 3. 技術實作確認
+- **CORS 政策**: 確認代理轉發設定
+- **認證機制**: 是否需要 token 驗證
+- **環境感知**: 開發/生產環境的差異處理
+- **錯誤處理**: 統一的錯誤處理策略
+
+---
+
+## BFF 設計模式 (Backend for Frontend)
+
+### 核心概念
+
+BFF 將 API 邏輯分為兩個專責層級：
+
+1. **BFF 層** (`server/api/v1/`): 專注於串接真實 API 端點
+2. **UI 層** (`composables/api/`): 專注於處理 UI 所需的資料格式
+
+### 檔案結構規範
+
+```
+server/api/v1/[模塊]/[功能].ts     # BFF 層：串接後端 API
+composables/api/[模塊]/use[功能]Fetch.ts  # UI 層：處理 UI 資料
+```
+
+### 實作原則
+
+#### BFF 層職責 (`server/api/v1/`)
+- 串接真實後端 API 端點
+- 處理認證 token 傳遞
+- 統一錯誤處理
+- 資料格式轉換（後端 → 前端）
+- 環境變數處理
+
+#### UI 層職責 (`composables/api/`)
+- 處理 UI 渲染所需的資料格式
+- 提供 reactive 狀態管理
+- 載入狀態處理
+- 快取策略控制
+- 使用者互動邏輯
+
+### 重構檢查清單
+
+重構現有 API 時必須確保：
+
+- [ ] 請求 API 的 request body 與重構前一致
+- [ ] Response body 與重構前一致
+- [ ] Pending 相關的 UX 優化邏輯完整移轉
+- [ ] 檔案命名高度相關，便於維護
+- [ ] Token 夾帶正確
+- [ ] Header 完整性
+- [ ] 表單資料格式處理正確
+- [ ] 圖片格式處理完整
+- [ ] Error、pending 處理一致性
+
+---
+
+## 非同步處理函數選擇指南
+
+### 函數選擇策略
+
+| 函數 | 適用場景 | 特點 |
+|------|----------|------|
+| `$fetch` | 一次性 API 呼叫、表單提交 | 無快取、無狀態管理 |
+| `useFetch` | Store 中的資料獲取、需要快取 | 內建快取、reactive 狀態 |
+| `useLazyFetch` | 非阻塞式資料獲取 | 延遲執行、不阻塞渲染 |
+| `useAsyncData` | 複雜的資料處理邏輯 | 更靈活的資料處理 |
+| `useLazyAsyncData` | 非阻塞式複雜資料處理 | 延遲執行 + 靈活處理 |
+
+### 選擇決策流程
+
+1. **需要快取嗎？** → 是：`useFetch` / `useLazyFetch`
+2. **需要 SSR 支援嗎？** → 是：`useFetch` / `useAsyncData`
+3. **需要載入狀態嗎？** → 是：`useFetch` / `useAsyncData`
+4. **一次性操作嗎？** → 是：`$fetch`
+5. **需要複雜資料處理嗎？** → 是：`useAsyncData` / `useLazyAsyncData`
+
+---
+
+## CORS 與代理轉發
+
+### 代理轉發設定
+
+專案已在 `nuxt.config.ts` 中設定代理轉發：
+
+```typescript
+nitro: {
+  routeRules: {
+    '/api-proxy/**': {
+      proxy: 'https://trybeta.rocket-coding.com/**',
+    },
+  },
+}
+```
+
+### API 請求策略
+
+- **公開資源**: 使用 `$fetch` 取得免 token 的資源
+- **認證資源**: 使用封裝的增強版本：
+  - `useUserApiFetch`: 處理用戶認證的 API 請求
+  - `useCompanyApiFetch`: 處理企業認證的 API 請求
+  - `useAdminApiFetch`: 處理管理員認證的 API 請求（如未來有需求）
+
+---
+
+## 環境感知邏輯
+
+### 環境變數處理
+
+針對「開發」、「生產」環境，在 API 請求邏輯中加入環境變數感知：
+
+```typescript
+const baseURL = process.env.NODE_ENV === 'production' 
+  ? 'https://api.production.com' 
+  : 'http://localhost:3000'
+```
+
+### 開發注意事項
+
+- 避免在開發環境可用的程式碼，到生產環境中變得錯誤
+- 使用 `nitro.routeRules` 處理代理轉發相關設定
+- 確保環境變數的正確配置
+
+---
+
+## 實作流程
+
+### 1. 需求確認階段
+- 確認 API 規格（端點、方法、資料格式）
+- 分析使用場景和邏輯鍊條
+- 確認技術實作細節
+
+### 2. 架構設計階段
+- 決定是否採用 BFF 模式
+- 選擇適當的非同步處理函數
+- 規劃檔案結構和命名
+
+### 3. 實作階段
+- 先實作 BFF 層（如適用）
+- 再實作 UI 層
+- 確保錯誤處理和載入狀態
+
+### 4. 測試與驗證
+- 驗證 API 請求/回應格式
+- 測試錯誤處理機制
+- 確認環境感知邏輯
+
+---
+
+## 程式碼範例
+
+### BFF 層實作範例
+
+```typescript
+// server/api/v1/user/profile.get.ts
+export default defineEventHandler(async (event) => {
+  const token = getCookie(event, 'auth-token')
+  
+  if (!token) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized'
+    })
+  }
+
+  try {
+    const response = await $fetch('https://api.backend.com/user/profile', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    
+    return response
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Internal Server Error'
+    })
+  }
+})
+```
+
+### UI 層實作範例
+
+```typescript
+// composables/api/user/useUserProfileFetch.ts
+export const useUserProfileFetch = () => {
+  const {
+    data: userProfile,
+    pending: isLoading,
+    error,
+    execute: refreshProfile
+  } = useFetch<UserProfile>('/api/v1/user/profile', {
+    key: 'user-profile',
+    server: false,
+    immediate: false
+  })
+
+  return {
+    userProfile,
+    isLoading,
+    error,
+    refreshProfile
+  }
+}
+```
+
+---
+
+## 注意事項
+
+- 優先保留當前 UI 結構不變，將 API 取回的資料填充到相對應 UI 位置
+- 如 server 要求前端提供簽發 token，前端發 API 請求時記得在 header 夾帶 token
+- 確保所有 API 請求都包含 'api' 在路徑中，符合專案架構設定
+- 遵循單一職責原則，將不同功能拆分到適當的檔案中

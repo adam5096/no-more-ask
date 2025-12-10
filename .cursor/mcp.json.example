@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+    "nuxt": {
+      "url": "http://localhost:3000/__mcp/sse"
+    },
+    "nuxt-docs": {
+      "url": "https://mcp.nuxt.com/sse"
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "YOUR_CONTEXT7_API_KEY_HERE"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+      }
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest",
+        "--headless=false",
+        "--isolated=true"
+      ]
+    }
+  }
+}
+

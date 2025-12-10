@@ -1,0 +1,91 @@
+---
+alwaysApply: false
+---
+# 每次修改本檔案時，都檢查全部範圍內是否存在多處語焉不詳(敘述模糊，請補充具體感)、語意衝突(後話和前話化打架)。如果發現後請指出並與我討論修改內容的去留。
+
+# Git Commit Message 規範 (Conventional Commits)
+
+簡短描述：本文件定義了專案中 Git 提交訊息的標準格式。所有提交都必須遵循「約定式提交 (Conventional Commits)」規範，以確保版本歷史的清晰、可讀，並為自動化流程（如產生 CHANGELOG）提供基礎。
+
+最後更新：2024-05-24
+
+---
+
+## 核心原則
+
+- **結構化提交**：所有提交訊息都必須遵循 `<類型>[可選範圍]: <主題描述>` 的格式
+- **意圖清晰**：提交類型（如 `feat`, `fix`）必須準確反映變更的內容
+- **自動化基礎**：標準化的提交是實現自動化版本管理和變更日誌生成的關鍵
+
+## 提交結構
+
+```
+<類型>[可選的範圍]: <主題描述>
+
+[可選的正文]
+
+[可選的頁腳]
+```
+
+## 類型 (Type) - 必需
+
+用於說明這次提交的類別，必須是以下關鍵字之一：
+
+- `feat`：新增功能 (feature)
+- `fix`：修復 Bug (bug fix)
+- `docs`：文件 (documentation) 相關的修改
+- `style`：不影響程式碼運作的調整（例如：格式化、修正空格）
+- `refactor`：重構，既不是新增功能也不是修復 Bug 的程式碼調整
+- `perf`：效能優化 (performance improvements)
+- `test`：新增或修改測試
+- `build`：影響建構系統或外部依賴的變動（例如：`package.json`）
+- `ci`：影響 CI/CD 設定檔或腳本的變動
+- `chore`：其他不修改 `src` 或 `test` 檔案的雜項事務
+
+## 主題 (Subject) - 必需
+
+- 使用**祈使句**，例如 "add login page" 而不是 "added login page"
+- 開頭不大寫
+- 結尾不加句號 `.`
+
+## 頁腳 (Footer) - 可選
+
+- **重大更新**：如果有不相容的變動，必須以 `BREAKING CHANGE:` 開頭說明
+- **關聯 Issue**：使用 `Closes #123`, `Fixes #456` 等關鍵字關聯 Issue
+
+---
+
+## 程式碼範例
+
+### ✅ 正確範例
+
+```bash
+# 簡單的新功能
+feat: allow users to upload avatars
+
+# 包含範圍、正文、頁腳的完整範例
+fix(api): correct user data validation
+
+The previous validation logic was too permissive and allowed invalid
+email formats to be registered, causing potential downstream issues.
+
+This commit introduces stricter regex validation for email formats
+and adds a dedicated unit test case.
+
+Closes: #245
+BREAKING CHANGE: The `POST /api/users` endpoint now returns a 400 error
+for invalid email formats instead of a 500 error.
+```
+
+### ❌ 錯誤範例
+
+```bash
+# 類型不標準，主題句大寫且使用過去式
+Fixed the login bug
+
+# 缺少類型，主題句過於模糊
+fix user profile
+
+# 主題句結尾有句號
+feat: add dark mode.
+```

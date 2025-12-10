@@ -1,0 +1,546 @@
+---
+alwaysApply: false
+---
+# Vue 3 Computed vs Watcher 使用場景指南
+
+簡短描述：本文件詳細說明 Vue 3 中 `computed` 與 `watcher` 的相同與不同之處，提供明確的判斷標準來選擇適當的使用場景。
+
+最後更新：2024-12-19
+
+---
+
+## 核心概念對比
+
+### 相同之處
+
+| 特性 | computed | watcher |
+|------|----------|---------|
+| **反應式** | ✅ 響應資料變化 | ✅ 響應資料變化 |
+| **自動更新** | ✅ 依賴改變時自動重新計算 | ✅ 監聽的資料改變時自動執行 |
+| **Vue 3 支援** | ✅ 完整支援 | ✅ 完整支援 |
+| **組合式 API** | ✅ 支援 | ✅ 支援 |
+
+### 關鍵差異
+
+| 特性 | computed | watcher |
+|------|----------|---------|
+| **主要用途** | 計算衍生值 | 執行外部影響操作 |
+| **返回值** | 必須有返回值 | 通常無返回值 |
+| **快取機制** | ✅ 有快取，依賴不變不重新計算 | ❌ 無快取，每次觸發都執行 |
+| **同步性** | ✅ 同步計算 | ✅ 可同步或異步 |
+| **外部影響** | ❌ 不應有外部影響 | ✅ 專門處理外部影響 |
+| **效能** | ✅ 高效能（有快取） | ⚠️ 需注意效能影響 |
+
+---
+
+## 使用場景判斷標準
+
+### 🎯 使用 `computed` 的情況
+
+#### 1. 純計算任務
+```vue
+<script setup lang="ts">
+const firstName = ref('John')
+const lastName = ref('Doe')
+
+// ✅ 適合：純計算，無副作用
+const fullName = computed(() => {
+  return `${firstName.value} ${lastName.value}`.trim()
+})
+
+const nameLength = computed(() => {
+  return fullName.value.length
+})
+</script>
+```
+
+#### 2. 資料過濾與排序
+```vue
+<script setup lang="ts">
+const users = ref<User[]>([])
+const searchQuery = ref('')
+const sortBy = ref<'name' | 'age'>('name')
+
+// ✅ 適合：基於現有資料計算新資料
+const filteredUsers = computed(() => {
+  return users.value.filter(user => 
+    user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+const sortedUsers = computed(() => {
+  return [...filteredUsers.value].sort((a, b) => {
+    return sortBy.value === 'name' 
+      ? a.name.localeCompare(b.name)
+      : a.age - b.age
+  })
+})
+</script>
+```
+
+#### 3. 格式化顯示資料
+```vue
+<script setup lang="ts">
+const price = ref(1000)
+const currency = ref('TWD')
+
+// ✅ 適合：格式化顯示
+const formattedPrice = computed(() => {
+  return new Intl.NumberFormat('zh-TW', {
+    style: 'currency',
+    currency: currency.value
+  }).format(price.value)
+})
+
+const displayText = computed(() => {
+  return `價格：${formattedPrice.value}`
+})
+</script>
+```
+
+#### 4. 條件性狀態判斷
+```vue
+<script setup lang="ts">
+const user = ref<User | null>(null)
+const permissions = ref<string[]>([])
+
+// ✅ 適合：基於多個狀態計算布林值
+const canEdit = computed(() => {
+  return user.value?.isActive && permissions.value.includes('edit')
+})
+
+const isAdmin = computed(() => {
+  return user.value?.role === 'admin'
+})
+</script>
+```
+
+### 🔄 使用 `watcher` 的情況
+
+#### 1. 執行外部影響操作
+```vue
+<script setup lang="ts">
+const userId = ref<string | null>(null)
+const userData = ref<User | null>(null)
+
+// ✅ 適合：當 userId 改變時，執行外部影響操作（API 請求）
+watch(userId, async (newUserId) => {
+  if (newUserId) {
+    try {
+      const response = await $fetch(`/api/users/${newUserId}`)
+      userData.value = response
+    } catch (error) {
+      console.error('Failed to fetch user:', error)
+    }
+  }
+})
+</script>
+```
+
+#### 2. 操作 DOM
+```vue
+<script setup lang="ts">
+const isVisible = ref(false)
+const elementRef = ref<HTMLElement>()
+
+// ✅ 適合：根據狀態變化操作 DOM
+watch(isVisible, (visible) => {
+  if (elementRef.value) {
+    elementRef.value.style.display = visible ? 'block' : 'none'
+  }
+})
+</script>
+```
+
+#### 3. 本地儲存同步
+```vue
+<script setup lang="ts">
+const settings = ref<Settings>({})
+
+// ✅ 適合：將狀態同步到本地儲存
+watch(settings, (newSettings) => {
+  localStorage.setItem('user-settings', JSON.stringify(newSettings))
+}, { deep: true })
+</script>
+```
+
+#### 4. 路由導航
+```vue
+<script setup lang="ts">
+const route = useRoute()
+const searchQuery = ref('')
+
+// ✅ 適合：根據路由變化執行操作
+watch(() => route.query.q, (newQuery) => {
+  if (newQuery) {
+    searchQuery.value = newQuery as string
+  }
+})
+</script>
+```
+
+#### 5. 計時器與動畫
+```vue
+<script setup lang="ts">
+const isAnimating = ref(false)
+let animationTimer: number | null = null
+
+// ✅ 適合：管理計時器和動畫
+watch(isAnimating, (animating) => {
+  if (animating) {
+    animationTimer = window.setTimeout(() => {
+      isAnimating.value = false
+    }, 1000)
+  } else {
+    if (animationTimer) {
+      clearTimeout(animationTimer)
+      animationTimer = null
+    }
+  }
+})
+</script>
+```
+
+---
+
+## 常見混淆場景與正確做法
+
+### ❌ 錯誤：用 `watcher` 做純計算
+
+```vue
+<script setup lang="ts">
+const firstName = ref('John')
+const lastName = ref('Doe')
+const fullName = ref('')
+
+// ❌ 錯誤：用 watcher 做純計算
+watch([firstName, lastName], ([newFirst, newLast]) => {
+  fullName.value = `${newFirst} ${newLast}`.trim()
+})
+</script>
+
+<template>
+  <p>{{ fullName }}</p>
+</template>
+```
+
+### ✅ 正確：用 `computed` 做純計算
+
+```vue
+<script setup lang="ts">
+const firstName = ref('John')
+const lastName = ref('Doe')
+
+// ✅ 正確：用 computed 做純計算
+const fullName = computed(() => {
+  return `${firstName.value} ${lastName.value}`.trim()
+})
+</script>
+
+<template>
+  <p>{{ fullName }}</p>
+</template>
+```
+
+### ❌ 錯誤：用 `computed` 執行外部影響操作
+
+```vue
+<script setup lang="ts">
+const userId = ref<string | null>(null)
+
+// ❌ 錯誤：computed 不應有外部影響
+const userData = computed(async () => {
+  if (userId.value) {
+    const response = await $fetch(`/api/users/${userId.value}`)
+    return response // 這會造成問題！
+  }
+  return null
+})
+</script>
+```
+
+### ✅ 正確：用 `watcher` 執行外部影響操作
+
+```vue
+<script setup lang="ts">
+const userId = ref<string | null>(null)
+const userData = ref<User | null>(null)
+
+// ✅ 正確：用 watcher 執行外部影響操作
+watch(userId, async (newUserId) => {
+  if (newUserId) {
+    try {
+      const response = await $fetch(`/api/users/${newUserId}`)
+      userData.value = response
+    } catch (error) {
+      console.error('Failed to fetch user:', error)
+    }
+  } else {
+    userData.value = null
+  }
+})
+</script>
+```
+
+---
+
+## 進階使用模式
+
+### 1. `computed` 與 `watcher` 的組合使用
+
+```vue
+<script setup lang="ts">
+const users = ref<User[]>([])
+const selectedUserId = ref<string | null>(null)
+
+// ✅ computed：計算當前選中的使用者
+const selectedUser = computed(() => {
+  return users.value.find(u => u.id === selectedUserId.value) || null
+})
+
+// ✅ watcher：當選中使用者改變時，執行外部影響操作
+watch(selectedUser, (user) => {
+  if (user) {
+    // 更新瀏覽器標題
+    document.title = `使用者：${user.name}`
+    
+    // 記錄使用者選擇
+    console.log('Selected user:', user.name)
+  }
+})
+</script>
+```
+
+### 2. 條件性 `watcher`
+
+```vue
+<script setup lang="ts">
+const isLoggedIn = ref(false)
+const userProfile = ref<User | null>(null)
+
+// ✅ 條件性 watcher：只在登入時監聽
+watch(isLoggedIn, (loggedIn) => {
+  if (loggedIn) {
+    // 登入時開始監聽使用者資料變化
+    watch(userProfile, (profile) => {
+      if (profile) {
+        // 同步到本地儲存
+        localStorage.setItem('user-profile', JSON.stringify(profile))
+      }
+    }, { immediate: true })
+  }
+})
+</script>
+```
+
+### 3. 深度監聽與效能優化
+
+```vue
+<script setup lang="ts">
+const formData = ref<FormData>({
+  name: '',
+  email: '',
+  preferences: {
+    theme: 'light',
+    language: 'zh-TW'
+  }
+})
+
+// ✅ 深度監聽：監聽物件內部變化
+watch(formData, (newData) => {
+  // 自動儲存表單資料
+  localStorage.setItem('form-draft', JSON.stringify(newData))
+}, { deep: true })
+
+// ✅ 效能優化：只監聽特定屬性
+watch(() => formData.value.preferences.theme, (newTheme) => {
+  // 主題改變時的特殊處理
+  document.documentElement.setAttribute('data-theme', newTheme)
+})
+</script>
+```
+
+---
+
+## 決策流程圖
+
+```
+需要響應資料變化嗎？
+├─ 否 → 不需要 computed 或 watcher
+└─ 是 → 需要返回值嗎？
+    ├─ 是 → 有外部影響嗎？
+    │   ├─ 是 → ❌ 重新設計，分離計算和外部影響
+    │   └─ 否 → ✅ 使用 computed
+    └─ 否 → 需要執行外部影響操作嗎？
+        ├─ 是 → ✅ 使用 watcher
+        └─ 否 → 考慮是否真的需要響應式
+```
+
+---
+
+## 內外部影響判斷標準
+
+### 🏠 內部 vs 外部的定義
+
+#### 📍 **內部**（Internal）
+**當前函數或組件範圍內的一切**
+
+#### 🌍 **外部**（External）
+**當前函數或組件範圍外的一切**
+
+### 🎯 具體區分標準
+
+#### 1. **函數層級的內外部**
+
+```javascript
+function calculateTotal(price, tax) {
+  // ✅ 內部：函數參數和局部變數
+  const total = price + tax
+  
+  // ❌ 外部影響：修改全域變數
+  window.globalCounter++  // 影響外部
+  
+  // ❌ 外部影響：修改傳入的物件
+  price.value = 0  // 影響外部
+  
+  return total  // ✅ 內部：返回值
+}
+```
+
+#### 2. **Vue 組件層級的內外部**
+
+```vue
+<script setup lang="ts">
+// ✅ 內部：組件內的狀態
+const count = ref(0)
+const message = ref('Hello')
+
+// ✅ 內部：組件內的計算
+const doubledCount = computed(() => count.value * 2)
+
+// ❌ 外部影響：修改 DOM
+const updateTitle = () => {
+  document.title = 'New Title'  // 影響外部
+}
+
+// ❌ 外部影響：API 請求
+const fetchData = async () => {
+  const data = await $fetch('/api/data')  // 影響外部（網路）
+  return data
+}
+
+// ❌ 外部影響：本地儲存
+const saveSettings = () => {
+  localStorage.setItem('settings', 'value')  // 影響外部（瀏覽器）
+}
+</script>
+```
+
+### 🔍 判斷內外部的實用方法
+
+#### 方法 1：**「如果這個函數被刪除，會影響什麼？」**
+
+```javascript
+// ✅ 內部：刪除後只影響函數本身
+function add(a, b) {
+  return a + b
+}
+
+// ❌ 外部：刪除後會影響其他東西
+function logMessage(msg) {
+  console.log(msg)  // 影響控制台
+  localStorage.setItem('log', msg)  // 影響瀏覽器儲存
+}
+```
+
+#### 方法 2：**「這個操作會改變外部環境嗎？」**
+
+```javascript
+// ✅ 內部：只改變函數內部的值
+function processData(data) {
+  const processed = data.map(item => item * 2)
+  return processed
+}
+
+// ❌ 外部：會改變外部環境
+function processData(data) {
+  data.forEach(item => {
+    item.value = item.value * 2  // 改變了外部傳入的物件
+  })
+  return data
+}
+```
+
+#### 方法 3：**「這個操作是可見的嗎？」**
+
+```javascript
+// ✅ 內部：外部看不到變化
+function calculateTax(price) {
+  const taxRate = 0.1
+  const tax = price * taxRate
+  return tax
+}
+
+// ❌ 外部：外部可以看到變化
+function calculateTax(price) {
+  const taxRate = 0.1
+  const tax = price * taxRate
+  
+  // 外部可以看到這些變化
+  document.getElementById('tax-display').textContent = tax
+  window.lastTaxCalculation = tax
+  
+  return tax
+}
+```
+
+### 📝 常見的外部影響操作
+
+```javascript
+// 這些都是外部影響
+console.log()           // 控制台
+localStorage.setItem()   // 瀏覽器儲存
+sessionStorage.setItem() // 瀏覽器儲存
+document.title = ''      // DOM
+fetch()                  // 網路
+setTimeout()            // 計時器
+window.open()           // 瀏覽器視窗
+```
+
+### ✅ 常見的內部操作
+
+```javascript
+// 這些都是內部操作
+const result = a + b     // 純計算
+const filtered = array.filter()  // 純計算
+const sorted = array.sort()       // 純計算（不修改原陣列）
+return value             // 返回值
+```
+
+### 🎯 快速判斷法
+
+1. **問自己**：「這個操作會讓外部環境變得不同嗎？」
+2. **檢查**：是否有 `console.log`、`localStorage`、`fetch`、`document` 等
+3. **思考**：如果這個函數被呼叫多次，外部環境會累積變化嗎？
+
+---
+
+## 效能考量
+
+### `computed` 效能優勢
+- **快取機制**：依賴不變時不會重新計算
+- **懶惰計算**：只有被使用時才計算
+- **依賴追蹤**：只追蹤實際使用的依賴
+
+### `watcher` 效能注意事項
+- **無快取**：每次觸發都會執行
+- **深度監聽**：可能造成效能問題
+- **清理機制**：記得清理計時器、事件監聽器等
+
+---
+
+## 相關資源
+
+- [Vue 3 Watchers 官方文件](https://vuejs.org/guide/essentials/watchers.html)
+- [VueUse Watch 函數集合](https://vueuse.org/functions.html#category=Watch)
+- [Vue 3 Computed Properties 官方文件](https://vuejs.org/guide/essentials/computed.html)

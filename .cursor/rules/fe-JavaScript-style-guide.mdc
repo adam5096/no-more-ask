@@ -1,0 +1,342 @@
+---
+alwaysApply: false
+---
+# 每次修改本檔案時，都檢查全部範圍內是否存在多處語焉不詳(敘述模糊，請補充具體感)、語意衝突(後話和前話化打架)。如果發現後請指出並與我討論修改內容的去留。
+
+# Vue.js 風格指南與最佳實踐
+
+簡短描述：此文件定義了專案中撰寫 Vue.js 元件的風格指南與最佳實踐。所有 `.vue`、`.js` 檔案都應遵循此規範，以確保程式碼的一致性、可讀性與可維護性。
+
+最後更新：2024-05-24
+
+---
+
+## 核心原則
+
+- **組合式 API 優先**：所有新元件都必須使用 `<script setup>` 的組合式 API，它提供了更佳的邏輯組織與重用性
+- **單向數據流**：嚴格遵守 "Props down, events up" 原則。子元件不應直接修改傳入的 props，而應透過 `emit` 事件通知父元件進行變更
+- **DRY (Don't Repeat Yourself)**：避免重複的邏輯。應將共用功能抽象化為可重用的組合式函式 (Composables)
+- **可讀性與簡潔性**：優先撰寫清晰易懂的程式碼。適時使用「提早返回 (Early Return)」來簡化函式邏輯，避免過深的巢狀結構
+
+## 命名慣例
+
+- **元件檔案**：使用大駝峰式 (`PascalCase`)，例如 `UserProfileCard.vue`
+- **變數/常數**：使用小駝峰式 (`camelCase`)，例如 `const userName = ref('')`
+- **事件處理函式**：必須以 `handle` 為前綴，並清楚描述其行為，例如 `const handleProfileUpdate = () => {}`
+- **Props & Emits**：在 `defineProps` 和 `defineEmits` 中使用 `camelCase`
+
+## `<script setup>` 內部結構順序
+
+為了保持一致性與可讀性，請遵循以下順序組織您的程式碼：
+
+1. `import` 陳述式
+2. `defineProps` & `defineEmits`
+3. `ref` / `reactive` 狀態變數
+4. `computed` 衍生狀態
+5. `watch` / `watchEffect` 監聽器
+6. 生命週期鉤子 (Lifecycle Hooks)，例如 `onMounted`
+7. 事件處理函式與其他方法
+
+---
+
+## 衍生狀態 (Derived State) 最佳實踐
+
+### 核心原則
+
+- **單一真相來源**：只保留最小可變狀態（API 原始資料、UI 控制），其他顯示用資料以 `computed` 推導
+- **避免錯誤的狀態同步**：不要使用 `watch` 或 `useEffect` 來手動同步狀態，而是透過衍生狀態來處理
+- **純函數推導**：`computed` 應該是純函數，無副作用，僅基於現有狀態計算新值
+
+### 何時使用 `computed`
+
+#### ✅ 適合使用 `computed` 的情況
+
+- **可純推導**：可由現有 state 決定、無副作用、同步可得
+- **跨元件重用**：推導邏輯在 store 層，頁面只綁定
+- **效能考量**：Vue `computed` 具備快取，避免同邏輯在 template 多次評估
+- **可讀性**：把「資料變形」與「呈現」分離
+
+#### ❌ 不適合使用 `computed` 的情況
+
+- 需要非同步操作或副作用
+- 計算量極大且頻繁變動
+- 與反應式無關的純格式化工具（應抽成 utils 函式）
+
+### 衍生狀態實作模式
+
+#### 1. 基本衍生狀態
+
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const firstName = ref('John')
+const lastName = ref('Doe')
+
+// ✅ 衍生狀態：組合顯示名稱
+const displayName = computed(() => {
+  return `${firstName.value} ${lastName.value}`.trim()
+})
+
+// ✅ 衍生狀態：檢查是否有效
+const isValidName = computed(() => {
+  return firstName.value.length > 0 && lastName.value.length > 0
+})
+</script>
+```
+
+#### 2. Store 中的衍生狀態
+
+```typescript
+// stores/useUserStore.ts
+export const useUserStore = defineStore('user', () => {
+  const user = ref<User | null>(null)
+  const selectedUserId = ref<string | null>(null)
+  
+  // ✅ 衍生狀態：當前選中的使用者
+  const selectedUser = computed(() => {
+    if (!user.value || !selectedUserId.value) return null
+    return user.value.id === selectedUserId.value ? user.value : null
+  })
+  
+  // ✅ 衍生狀態：使用者狀態文字
+  const userStatusText = computed(() => {
+    if (!user.value) return '未登入'
+    return user.value.isActive ? '已啟用' : '已停用'
+  })
+  
+  return {
+    user,
+    selectedUserId,
+    selectedUser,
+    userStatusText
+  }
+})
+```
+
+#### 3. 避免錯誤的狀態同步做法
+
+```vue
+<script setup lang="ts">
+// ❌ 錯誤做法：使用 watch 同步狀態
+const users = ref<User[]>([])
+const selectedUserId = ref<string | null>(null)
+
+// 不要這樣做！
+watch(users, (newUsers) => {
+  if (selectedUserId.value && !newUsers.some(u => u.id === selectedUserId.value)) {
+    selectedUserId.value = null // 手動同步
+  }
+})
+
+// ✅ 正確做法：使用衍生狀態
+const validSelectedUserId = computed(() => {
+  if (!selectedUserId.value) return null
+  return users.value.some(u => u.id === selectedUserId.value) 
+    ? selectedUserId.value 
+    : null
+})
+
+const selectedUser = computed(() => {
+  return users.value.find(u => u.id === validSelectedUserId.value) || null
+})
+</script>
+```
+
+#### 4. 與 API 資料整合
+
+```vue
+<script setup lang="ts">
+import { useFetch } from '#app'
+
+// API 資料
+const { data: users, pending } = useFetch<User[]>('/api/users', {
+  key: 'users-list'
+})
+
+// UI 狀態
+const selectedUserId = ref<string | null>(null)
+const searchQuery = ref('')
+
+// ✅ 衍生狀態：過濾後的使用者列表
+const filteredUsers = computed(() => {
+  if (!users.value) return []
+  
+  return users.value.filter(user => 
+    user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+// ✅ 衍生狀態：當前選中的使用者
+const selectedUser = computed(() => {
+  if (!users.value || !selectedUserId.value) return null
+  return users.value.find(u => u.id === selectedUserId.value) || null
+})
+
+// ✅ 衍生狀態：選中狀態是否有效
+const isSelectionValid = computed(() => {
+  return selectedUserId.value !== null && selectedUser.value !== null
+})
+</script>
+```
+
+### 進階衍生狀態模式
+
+#### 1. 條件性預設值
+
+```vue
+<script setup lang="ts">
+const users = ref<User[]>([])
+const selectedUserId = ref<string | null>(null)
+
+// ✅ 衍生狀態：自動選擇第一個使用者作為預設值
+const effectiveSelectedUserId = computed(() => {
+  return selectedUserId.value ?? users.value[0]?.id ?? null
+})
+
+const selectedUser = computed(() => {
+  return users.value.find(u => u.id === effectiveSelectedUserId.value) || null
+})
+</script>
+```
+
+#### 2. 複雜的資料轉換
+
+```vue
+<script setup lang="ts">
+const plan = ref<Plan | null>(null)
+
+// ✅ 衍生狀態：方案狀態文字
+const planStatusText = computed(() => {
+  if (!plan.value) return '無方案'
+  
+  const { status, expiresAt } = plan.value
+  const now = new Date()
+  const expiry = new Date(expiresAt)
+  
+  if (status === 'active' && expiry > now) {
+    return '方案有效中'
+  } else if (status === 'active' && expiry <= now) {
+    return '方案已過期'
+  } else {
+    return '方案已停用'
+  }
+})
+
+// ✅ 衍生狀態：方案詳細資訊
+const planDetails = computed(() => {
+  if (!plan.value) return null
+  
+  return {
+    name: plan.value.name,
+    duration: `${plan.value.duration} 天`,
+    limit: `${plan.value.limit} 次`,
+    period: `${plan.value.startDate} 至 ${plan.value.endDate}`
+  }
+})
+</script>
+```
+
+### 效能考量
+
+#### 1. 避免不必要的重新計算
+
+```vue
+<script setup lang="ts">
+const items = ref<Item[]>([])
+const filter = ref('')
+
+// ✅ 好的做法：使用 computed 快取
+const filteredItems = computed(() => {
+  return items.value.filter(item => 
+    item.name.toLowerCase().includes(filter.value.toLowerCase())
+  )
+})
+
+// ❌ 避免：在 template 中直接計算
+// {{ items.filter(item => item.name.includes(filter)) }}
+</script>
+```
+
+#### 2. 複雜計算的優化
+
+```vue
+<script setup lang="ts">
+const largeDataset = ref<Data[]>([])
+
+// ✅ 對於複雜計算，使用 computed 確保快取
+const processedData = computed(() => {
+  return largeDataset.value
+    .filter(item => item.isActive)
+    .sort((a, b) => a.priority - b.priority)
+    .map(item => ({
+      ...item,
+      displayName: `${item.firstName} ${item.lastName}`
+    }))
+})
+</script>
+```
+
+### 測試友善的衍生狀態
+
+```vue
+<script setup lang="ts">
+const user = ref<User | null>(null)
+
+// ✅ 純函數，易於測試
+const userDisplayInfo = computed(() => {
+  if (!user.value) return { name: 'Guest', status: 'inactive' }
+  
+  return {
+    name: user.value.name || 'Unknown',
+    status: user.value.isActive ? 'active' : 'inactive'
+  }
+})
+</script>
+```
+
+---
+
+## 相關資源
+
+- [Vue 3 Computed Properties 官方文件](https://vuejs.org/guide/essentials/computed.html)
+- [Deriving Client State from Server State](https://tkdodo.eu/blog/deriving-client-state-from-server-state) - TkDodo 的衍生狀態最佳實踐
+
+---
+
+## 程式碼範例
+
+### ✅ 正確範例：一個結構清晰的元件
+
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import type { User } from '~/types';
+
+// 1. Props & Emits
+const props = defineProps<{
+  userProfile: User;
+}>();
+
+const emit = defineEmits<{
+  (e: 'update', payload: User): void;
+}>();
+
+// 2. 狀態變數
+const isEditing = ref(false);
+
+// 3. 衍生狀態
+const displayName = computed(() => {
+  return props.userProfile.name || 'Guest';
+});
+
+// 4. 事件處理函式
+const handleToggleEdit = (): void => {
+  if (!props.userProfile) {
+    return;
+  }
+  isEditing.value = !isEditing.value;
+  emit('update', props.userProfile);
+};
+</script>
+```
