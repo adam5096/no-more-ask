@@ -13,20 +13,20 @@
     "postinstall": "pnpm build:tokens && nuxt prepare"
   },
   "dependencies": {
-    "@mdi/font": "^7.4.47",
     "@nuxt/eslint": "1.11.0",
     "@nuxt/image": "2.0.0",
     "@nuxt/test-utils": "3.20.1",
+    "@vueuse/core": "^14.1.0",
     "eslint": "^9.39.1",
     "nuxt": "^3.20.1",
+    "shadcn-nuxt": "2.4.2",
     "typescript": "^5.9.3",
     "vue": "^3.5.25",
-    "vue-router": "^4.6.3",
-    "vuetify": "^3.11.0",
-    "vuetify-nuxt-module": "^0.18.8"
+    "vue-router": "^4.6.3"
   },
   "devDependencies": {
-    "@nuxtjs/tailwindcss": "^6.14.0",
-    "style-dictionary": "^5.1.1"
+    "@tailwindcss/vite": "^4.0.0",
+    "style-dictionary": "^5.1.1",
+    "tailwindcss": "^4.0.0"
   }
 }

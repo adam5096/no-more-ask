@@ -1,5 +1,1 @@
-/* Design Tokens 已通過 nuxt.config.ts 載入，無需在此處再次導入 */
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
