@@ -74,6 +74,22 @@
         </div>
       </div>
 
+      <!-- shadcn-vue Button 組件測試區域 -->
+      <div class="bg-white rounded-lg shadow-lg p-8 mb-12">
+        <h2 class="text-3xl font-bold text-neutral-800 mb-6 text-center">shadcn-vue Button 組件</h2>
+        <p class="text-center text-neutral-600 mb-6">
+          使用 shadcn-vue 的 Button 組件
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <Button variant="default">預設按鈕</Button>
+          <Button variant="destructive">危險按鈕</Button>
+          <Button variant="outline">外框按鈕</Button>
+          <Button variant="secondary">次要按鈕</Button>
+          <Button variant="ghost">幽靈按鈕</Button>
+          <Button variant="link">連結按鈕</Button>
+        </div>
+      </div>
+
       <!-- Design Tokens 展示區域 -->
       <div class="bg-white rounded-lg shadow-lg p-8 mb-12">
         <h2 class="text-3xl font-bold text-neutral-800 mb-6 text-center">Design Tokens 展示</h2>

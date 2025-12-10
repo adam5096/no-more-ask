@@ -11,8 +11,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 語義化顏色 tokens
+        // shadcn-vue 需要的顏色變數（從 Style Dictionary 生成的 tokens）
+        border: 'hsl(var(--shadcn-border))',
+        input: 'hsl(var(--shadcn-input))',
+        ring: 'hsl(var(--shadcn-ring))',
+        background: 'hsl(var(--shadcn-background))',
+        foreground: 'hsl(var(--shadcn-foreground))',
         primary: {
+          DEFAULT: 'hsl(var(--shadcn-primary))',
+          foreground: 'hsl(var(--shadcn-primary-foreground))',
           50: 'var(--color-primary-50)',
           100: 'var(--color-primary-100)',
           200: 'var(--color-primary-200)',
@@ -25,6 +32,31 @@ export default {
           900: 'var(--color-primary-900)',
           950: 'var(--color-primary-950)',
         },
+        secondary: {
+          DEFAULT: 'hsl(var(--shadcn-secondary))',
+          foreground: 'hsl(var(--shadcn-secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--shadcn-destructive))',
+          foreground: 'hsl(var(--shadcn-destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--shadcn-muted))',
+          foreground: 'hsl(var(--shadcn-muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--shadcn-accent))',
+          foreground: 'hsl(var(--shadcn-accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--shadcn-popover))',
+          foreground: 'hsl(var(--shadcn-popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--shadcn-card))',
+          foreground: 'hsl(var(--shadcn-card-foreground))',
+        },
+        // 語義化顏色 tokens（保留原有配置）
         success: {
           50: 'var(--color-success-50)',
           100: 'var(--color-success-100)',
@@ -51,6 +83,8 @@ export default {
           900: 'var(--color-danger-900)',
           950: 'var(--color-danger-950)',
         },
+        // 將 danger 映射到 destructive（shadcn-vue 使用）
+        // destructive 已在上面定義
         neutral: {
           50: 'var(--color-neutral-50)',
           100: 'var(--color-neutral-100)',
