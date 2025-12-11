@@ -8,7 +8,8 @@ export default defineNuxtConfig({
     '@nuxt/test-utils',
     '@nuxt/eslint',
     '@nuxtjs/tailwindcss',
-    'shadcn-nuxt'
+    'shadcn-nuxt',
+    '@vueuse/nuxt'
   ],
 
   // 載入自訂 CSS 文件，確保設計 tokens 和 Tailwind 樣式被正確處理
