@@ -1,0 +1,22 @@
+---
+alwaysApply: false
+---
+# Rule: Page Routing (User-Facing)
+
+This rule defines the standards for user-facing URLs in the `pages/` directory.
+
+## Core Principles
+- **Target Audience:** End-users, SEO crawlers, and browser bookmarks.
+- **Hierarchy:** Keep paths flat and simple. Avoid nesting deeper than 3 levels.
+- **Stability:** URL structure should reflect user intent, not internal database schemas.
+
+## Naming Conventions
+- **Case:** Use strictly `kebab-case` (lowercase with hyphens).
+- **Prefix:** Do NOT use `/api/` or technical prefixes.
+- **Dynamic Segments:** - Prefer `[slug]` for SEO-sensitive content (e.g., `/products/[slug]`).
+  - Use `[id]` only for private or non-SEO content (e.g., `/settings/[id]`).
+
+## Examples
+- ✅ GOOD: `/products/detail-view`, `/user-settings/profile`
+- ❌ AVOID: `/ProductDetail`, `/user_settings/profile_details`
+

@@ -1,0 +1,40 @@
+---
+alwaysApply: true
+---
+
+# Self-Documenting & Navigable Architecture Rules (Vue/Nuxt)
+
+## 1. Naming Conventions (Semantic Clarity)
+* **Components:** Use PascalCase and multi-word names that describe the specific domain/purpose (e.g., `UserProfileCard.vue` instead of `Card.vue`).
+* **Functions/Methods:** Start with action-oriented verbs (e.g., `fetchData`, `handleAuthSubmit`). Avoid generic names like `doProcess`.
+* **State/Variables:** Use nouns that represent the content or boolean prefixes for status (e.g., `isSidebarOpen`, `productList`, `currentUser`).
+* **Consistency:** Ensure variable names match their underlying data structure to reduce cognitive load.
+
+## 2. Directory Structure (Navigability)
+* **Feature-Based Organization:** Group files by business domain rather than generic types. 
+    * Preferred: `features/auth/components/`, `features/products/composables/`.
+* **Nuxt Convention:** Strictly adhere to Nuxt’s directory structure (`pages/`, `server/api/`, `layouts/`) to leverage "Convention over Configuration" as a built-in guide.
+* **Proximity Principle:** Place related logic (composables, types, or sub-components) as close to the usage point as possible to facilitate navigation.
+
+## 3. Component Architecture (Internal Readability)
+* **Single Responsibility (SRP):** * **Containers:** Focus on data fetching and state management.
+    * **Presentational:** Focus on UI rendering via Props and Emits.
+* **Standardized Script Setup Order:**
+    1. Imports (External dependencies)
+    2. DefineProps / DefineEmits (Input/Output contract)
+    3. Reactive State / Refs
+    4. Computed Properties
+    5. Methods / Functions
+    6. Watchers
+    7. Lifecycle Hooks
+* **Explicit Props/Emits:** Always define types and default values to serve as internal documentation.
+
+## 4. Documentation & Intelligence (Self-Explanation)
+* **"Why", not "What":** Use comments to explain design decisions, edge cases, or workarounds. Do not explain what the code obviously does.
+* **JSDoc/TSDoc Integration:** Provide structured comments for complex functions and props. This enables IDE hover-tooltips for "automatic guidance."
+* **Code as Truth:** Prefer clear, descriptive code over complex logic paired with heavy commenting.
+
+## 5. Nuxt Specific Patterns
+* **Composables:** Use the `use[Feature]` naming pattern (e.g., `useAuth`).
+* **Auto-imports:** While Nuxt supports auto-imports, ensure complex dependencies are organized to maintain traceabilty.
+* **Server Routes:** Mirror the frontend feature structure within `server/api/` for consistency.

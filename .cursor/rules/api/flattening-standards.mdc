@@ -1,0 +1,45 @@
+---
+alwaysApply: false
+---
+# API Design & Flattening Standards
+
+When designing or refactoring API routes and endpoints, strictly adhere to these flattening principles to ensure maintainability and readability.
+
+## 1. Resource Flattening (Over-Nested Hierarchy)
+**Principle: Collections over Hierarchy. ID-based access.**
+
+- **No Deep Nesting**: Avoid resource nesting deeper than two levels (e.g., `/a/{id}/b` is fine; `/a/{id}/b/{id}/c` is prohibited).
+- **Query Filters over Paths**: If a sub-resource has a globally unique ID, promote it to a top-level collection and use query parameters for relationships.
+    - ❌ BAD: `GET /users/{u_id}/habits/{h_id}/entries`
+    - ✅ GOOD: `GET /entries?habitId={h_id}`
+- **Naming Convention**: Always use **plural nouns** for collection names.
+    - Examples: `/users`, `/products`, `/orders`
+
+## 2. Action-to-Resource Mapping (Verb Nesting)
+**Principle: Use standard HTTP methods. Avoid verbs in the URI path.**
+
+- **State Transitions**: Use `PATCH` or `PUT` to update statuses instead of action-based paths.
+    - ❌ BAD: `POST /orders/{id}/cancel`
+    - ✅ GOOD: `PATCH /orders/{id}` with Body: `{ "status": "cancelled" }`
+- **Search Operations**: Use `GET` with query strings for retrieval.
+    - ❌ BAD: `POST /search-articles`
+    - ✅ GOOD: `GET /articles?q={keyword}`
+- **Complex Actions as Resources**: If an action doesn't map to CRUD (e.g., bulk processing, calculations), treat the action as a "Job" or "Task" resource.
+    - Example: `POST /reconciliation-jobs` (Initiates a process)
+
+## 3. API Versioning
+**Principle: Header-based versioning is preferred over path-based versioning.**
+
+- **Header Strategy**: Use the `Accept` header or a custom header to specify versions.
+    - Example: `Accept: application/json; version=2`
+- **Clean Paths**: Keep versioning out of the URL string to maintain a flat and consistent URI structure across versions.
+
+## 4. Developer Checklist
+- [ ] Are all path segments plural nouns?
+- [ ] Is the nesting depth ≤ 2?
+- [ ] Are relationships handled via Query Parameters instead of Paths?
+- [ ] Does the HTTP method (GET/POST/PATCH/DELETE) correctly describe the operation?
+
+---
+
+**Note to AI:** If the requested implementation involves deep nesting or RPC-style verb paths, proactively suggest a flattened RESTful alternative to the user.

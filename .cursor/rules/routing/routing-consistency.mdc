@@ -1,0 +1,18 @@
+---
+alwaysApply: false
+---
+# Rule: Routing & API Consistency
+
+This rule ensures semantic alignment between Page Routing and BFF Paths.
+
+## Terminology Alignment
+- **Resource Naming:** If a Page represents a "Product", the corresponding BFF API must also use the word "Product".
+  - *Example:* Page `/inventory` should NOT have a BFF `/api/stock-items`. Keep them both as `inventory` or `stock`.
+
+## Parameter Mapping
+- **Identity Consistency:** Use the same key names for dynamic parameters across layers.
+  - If a page route is `/order/[orderId]`, the BFF call must be `/api/order/[orderId]/details`. 
+  - Do not switch between `id`, `uuid`, and `orderId` arbitrarily.
+
+## Workflow
+- When creating a new feature, always verify that the BFF path semantic structure mirrors the Page route it serves.

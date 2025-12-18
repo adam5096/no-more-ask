@@ -1,0 +1,47 @@
+---
+alwaysApply: false
+---
+# BFF (Backend For Frontend) & Frontend Architectural Rules
+
+## 🎯 Core Principles
+- **Responsibility-Driven Design:** Define granularity based on UI logical chunks and business requirements, not database tables.
+- **High Cohesion:** Data that is "Strongly Coupled" (must be displayed together) should be aggregated into a single BFF response.
+- **Change Isolation:** The BFF layer must shield the frontend from backend microservice changes by maintaining a stable API contract.
+
+---
+
+## 📂 Level 1: Page (1) to BFF Paths (N)
+- **Simple Page:** Ratio **1:1**. (e.g., Static Info, About Us).
+- **Standard CRUD:** Ratio **1:2 or 1:3**. Split into "Primary Resource" and "Secondary/Related Resources" (e.g., Product Info + User Reviews).
+- **Complex Dashboard:** Ratio **1:N (N > 3)**. Each independent widget, card, or chart should have its own dedicated BFF path to support independent loading states (Skeletons).
+
+**Frontend Implementation Rule:**
+- Use semantic hooks naming: `use[SectionName]Data()`.
+- Avoid "Waterfall" calls in components; if A is required for B, aggregate them in the BFF.
+
+---
+
+## 🛠️ Level 2: BFF Path (1) to Downstream API Endpoints (N)
+- **Passthrough:** Ratio **1:1**. Used for simple proxying, auth, or logging.
+- **Standard Aggregation:** Ratio **1:2 to 1:3**. Combine core data with supplementary info from different services.
+- **Business Transaction:** Ratio **1:N (N > 3)**. Used for complex actions like "Checkout" that involve multiple service calls and compensation logic.
+
+**BFF Implementation Rule:**
+- **Threshold:** If a BFF path calls > 5 downstream APIs, document the "Business Goal" clearly or consider refactoring.
+- **Aggregation Logic:** All data mapping and transformation must happen in the BFF, ensuring the frontend receives "UI-ready" JSON.
+
+---
+
+## 🏷️ Naming & Structure
+- **BFF Endpoint Pattern:** `[METHOD] /api/[domain]/[page-context]/[action-or-resource]`
+  - *Example:* `GET /api/inventory/product-detail/stock-status`
+- **Hook Pattern:** `use[PageContext][Resource]()`
+  - *Example:* `useProductStockStatus()`
+
+---
+
+## 🔍 AI Enforcement Checklist
+- [ ] Is the BFF path hiding backend microservice complexity?
+- [ ] Does the granularity match the "Page Complexity Scale" defined above?
+- [ ] Are independent UI sections separated to prevent blocking the whole page?
+- [ ] Is the naming convention strictly following the [domain]/[context] pattern?

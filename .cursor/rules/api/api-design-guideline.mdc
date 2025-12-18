@@ -1,0 +1,55 @@
+---
+alwaysApply: false
+---
+# API Design Guidelines: Flattened RESTful Resources
+
+## 🎯 Core Philosophy
+Prioritize **Flattened Structures** over deep nesting. Treat API URLs as entry points to **Top-Level Resource Collections**. Use query parameters to handle relationships and filtering to ensure the API is "easy to read, easy to modify, and easy to test."
+
+## 🛠 Design Principles
+
+### 1. Resource Naming and Pathing
+- **Use Plural Nouns**: All resource collections must use plural nouns.
+  - ✅ `GET /entries`
+  - ✅ `GET /entries/{id}`
+  - ❌ `GET /entry/{id}`
+- **Avoid Deep Nesting**: Limit path hierarchy to a maximum of one level of nesting (only for strong ownership).
+  - ✅ `GET /entries?habitId={id}`
+  - ❌ `GET /users/{uid}/habits/{hid}/entries`
+
+### 2. Relationships & Filtering
+- **Query Parameters**: Use query strings to express "belongs-to" or filtering logic.
+  - Example: `GET /entries?habitId=123`
+- **Strong Ownership (Exception)**: Nesting is only acceptable if a sub-resource cannot exist independently from its parent.
+  - Example: `GET /orders/{order_id}/line-items`
+
+### 3. Authentication & Security
+- **Identity via Tokens**: Never include the current user's ID in the URL path. Extract `user_id` from the **Authorization Token (Claims)** on the server side.
+  - ✅ `GET /entries` (Filter by authenticated user internally)
+  - ❌ `GET /users/{user_id}/entries`
+- **Direct Access**: Use the unique Resource ID (UUID/ID) for direct operations.
+  - ✅ `GET /entries/{entry_id}`
+
+### 4. Nouns over Verbs
+- **No Actions in Paths**: Paths should represent resources, not functions or procedures.
+- **State Management**: Use `PATCH` with a request body to change resource states.
+  - ✅ `PATCH /articles/{id}` (Body: `{ "status": "published" }`)
+  - ❌ `POST /articles/{id}/publish`
+- **Search Operations**:
+  - ✅ `GET /orders?q=keyword`
+  - ❌ `GET /orders/search`
+
+## 📊 Quick Reference Table
+
+| Context | Recommended (Flattened) | Avoid (Nested/RPC-style) |
+| :--- | :--- | :--- |
+| Get entries for a habit | `GET /entries?habitId={id}` | `GET /habits/{id}/entries` |
+| Get current user profile | `GET /profile` | `GET /users/{my_id}` |
+| Create a new entry | `POST /entries` (habitId in Body) | `POST /habits/{id}/entries` |
+| Resource Action | `PATCH /tasks/{id}` | `POST /tasks/{id}/run` |
+
+## ⚠️ AI Constraint (For Cursor)
+When generating API routes, controllers, or documentation:
+1. If a path exceeds two segments (e.g., `/a/1/b/2/c`), suggest refactoring to query parameters.
+2. Ensure no `userId` is present in the path parameters for the authenticated user's own resources.
+3. Validate that all resource names are plural nouns.

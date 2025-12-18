@@ -1,6 +1,7 @@
 ---
 alwaysApply: false
 ---
+
 # 每次修改本檔案時，都檢查全部範圍內是否存在多處語焉不詳(敘述模糊，請補充具體感)、語意衝突(後話和前話化打架)。如果發現後請指出並與我討論修改內容的去留。
 
 # Git Commit Message 規範 (Conventional Commits)
@@ -8,8 +9,6 @@ alwaysApply: false
 簡短描述：本文件定義了專案中 Git 提交訊息的標準格式。所有提交都必須遵循「約定式提交 (Conventional Commits)」規範，以確保版本歷史的清晰、可讀，並為自動化流程（如產生 CHANGELOG）提供基礎。
 
 最後更新：2024-05-24
-
----
 
 ## 核心原則
 

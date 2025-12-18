@@ -1,0 +1,18 @@
+---
+alwaysApply: true
+---
+
+## 類型 (Type) - 必需
+
+用於說明這次提交的類別，必須是以下關鍵字之一：
+
+- `feat`：新增功能 (feature)
+- `fix`：修復 Bug (bug fix)
+- `docs`：文件 (documentation) 相關的修改
+- `style`：不影響程式碼運作的調整（例如：格式化、修正空格）
+- `refactor`：重構，既不是新增功能也不是修復 Bug 的程式碼調整
+- `perf`：效能優化 (performance improvements)
+- `test`：新增或修改測試
+- `build`：影響建構系統或外部依賴的變動（例如：`package.json`）
+- `ci`：影響 CI/CD 設定檔或腳本的變動
+- `chore`：其他不修改 `src` 或 `test` 檔案的雜項事務

@@ -1,0 +1,52 @@
+---
+alwaysApply: false
+---
+
+# Nuxt 3 JWT Authentication & Route Guard Implementation Guideline
+
+## Context
+Use this rule when implementing or refactoring authentication logic, route middlewares, or user state management in Nuxt 3.
+
+## Core Principles
+- **Separation of Concerns**: Decouple Auth Logic (Composables) from Navigation Control (Middleware).
+- **Reactivity**: Use `ref` and `computed` to ensure the UI reacts to auth state changes.
+- **Data Integrity**: Always ensure user data is fetched/validated before navigation decisions are made.
+
+## Implementation Standards
+
+### 1. Service Layer: `composables/useAuth.ts`
+- **Token Management**: Use `useCookie('auth_token')` as the single source of truth for the JWT.
+- **State Management**: 
+    - Store user profile in `const user = useState('user', () => null)`.
+    - Define `isAuthenticated` as a `computed` property.
+- **Validation Logic**:
+    - Implement `fetchUser()`: Only call API if `token` exists and `user` state is null.
+    - Implement `hasPermission(roles: string[])`: Returns boolean based on user profile metadata.
+
+### 2. Guard Layer: `middleware/auth.global.ts`
+- **Global Check**: Intercept routes requiring authentication.
+- **Pre-fetch Strategy**: 
+    - Execution: `await useAuth().fetchUser()` must be called before any logic.
+- **Navigation Logic**:
+    - Check `to.meta.requiresAuth`.
+    - If `true` and `!isAuthenticated`, `return navigateTo('/login')`.
+
+### 3. Configuration Layer: `pages/*.vue`
+- **Metadata Definition**: Use `definePageMeta` for declarative protection.
+- **Usage Example**:
+    ```typescript
+    definePageMeta({
+      requiresAuth: true,
+      // middleware: ['role-check'], // For specific role requirements
+    })
+    ```
+
+## Testing Requirements
+- **Unit Testing (Vitest)**:
+    - Test `useAuth` logic (login, logout, permission checks) in isolation without router dependencies.
+- **Integration Testing**:
+    - Mock `useAuth` state to verify `middleware` returns the correct `MapsTo` destination.
+
+## Constraints
+- DO NOT store JWT in `localStorage` to avoid SSR mismatch and XSS risks.
+- DO NOT perform side effects (like API calls) directly inside `definePageMeta`.

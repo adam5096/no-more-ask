@@ -1,0 +1,37 @@
+---
+alwaysApply: false
+---
+# BFF API Design & Naming Conventions
+
+## Context
+Our architecture utilizes a Nuxt-based BFF layer. We follow RESTful Level 2 for resource management while adopting Level 3 principles for business process control and flow orchestration.
+
+## Guidelines
+
+### 1. Resource-Oriented Base Paths (Level 2)
+- **Noun-Based:** Primary path segments must be plural nouns representing resources.
+- **Flat Structure:** Keep path nesting to a minimum (max 2-3 levels) to ensure resource addressability.
+- **Client Scoping:** Use a client-type prefix to separate concerns if necessary (e.g., `/api/web/`, `/api/mobile/`).
+
+### 2. Action-Oriented Endpoints (Level 3 / Business Logic)
+- **Verb Suffixes:** Append a verb at the end of the URI only for non-standard CRUD operations or complex business processes.
+- **State Transitions:** Use verbs to describe state changes that carry significant business meaning (e.g., `/publish`, `/cancel`, `/approve`).
+- **Transaction Handling:** For operations involving multiple resources, use a dedicated controller-style path (e.g., `/checkout/submit`).
+
+### 3. HTTP Method Selection
+- **GET:** Fetching resources or data aggregations.
+- **POST:** Creating new resources OR triggering business actions (verb-ended paths).
+- **PUT/PATCH:** Standard updates to resource fields.
+- **DELETE:** Standard removal of resources.
+
+### 4. Examples
+| Intent | RESTful Route (Level 2) | BFF Action Route (Level 3) |
+| :--- | :--- | :--- |
+| **Order Management** | `GET /api/web/orders/{id}` | `POST /api/web/orders/{id}/cancel` |
+| **Content Lifecycle** | `PUT /api/web/posts/{id}` | `POST /api/web/posts/{id}/publish` |
+| **User Transaction** | `POST /api/web/cart` | `POST /api/web/checkout/submit` |
+
+## Code Generation Requirements
+- Always prioritize semantic clarity for the frontend over strict backend database mapping.
+- When generating Nitro server routes in Nuxt, ensure the folder structure reflects these naming conventions.
+- Ensure TypeScript interfaces for API responses include hypermedia hints or status flags where applicable.

@@ -1,0 +1,23 @@
+---
+alwaysApply: false
+---
+# Rule: BFF Path (Nuxt server/api)
+
+This rule defines the standards for frontend-facing data endpoints in the `server/api/` directory.
+
+## Core Principles
+- **Target Audience:** Frontend components and service layers (DX).
+- **Aggregation:** One BFF endpoint should aggregate multiple backend REST API calls to minimize frontend HTTP requests.
+- **Action-Oriented:** BFF paths can include verbs to describe the specific data operation.
+
+## Naming Conventions
+- **Prefix:** Every path must reside under `/api/`.
+- **Suffixes:** Use descriptive action suffixes:
+  - `/details`: Fetching aggregated detailed data.
+  - `/init-data`: Initial state for a page.
+  - `/results`: Fetching a collection of filtered/searched items.
+- **Logic:** Hide backend microservice complexity from the frontend.
+
+## Examples
+- ✅ GOOD: `/api/products/[id]/details`, `/api/dashboard/init-data`
+- ❌ AVOID: `/api/get-all-product-data-from-database`

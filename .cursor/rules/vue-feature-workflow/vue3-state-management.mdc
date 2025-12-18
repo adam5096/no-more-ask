@@ -1,0 +1,65 @@
+---
+alwaysApply: false
+---
+
+# Vue 3 State Management Strategy & Locality Framework
+
+## [Core Philosophy]
+* **Prioritize Locality:** Always start with the simplest state mechanism. Only escalate to global management when state must persist across unrelated routes or complex modules.
+* **Predictable Mutations:** Maintain a strict separation between "State Readers" and "State Writers."
+* **Minimal Surface Area:** Expose only what is necessary to the consuming components.
+
+---
+
+## 1. Decision Framework: Scope & Ownership
+
+### A. Local State (Single Component)
+* **Definition:** Data strictly confined to a single component's UI logic.
+* **Examples:** Toggle states (`isOpen`), form input buffers, local loading indicators.
+* **Implementation:** Use `ref()` or `reactive()` directly within the `.vue` file.
+
+### B. Component-Tree Shared State (Local Owner)
+* **Definition:** State shared between a parent and its specific descendants (Ancestors to Children).
+* **Criteria:** The state does not need to exist if this specific feature module is unmounted.
+* **Implementation (Shallow):** Use **Props** (Downwards) and **Emits** (Upwards).
+* **Implementation (Deep):** Use **Provide / Inject** to avoid prop drilling beyond 2 levels.
+
+### C. Cross-Module Shared State (Global Owner)
+* **Definition:** State required by unrelated components, different routes, or global business logic.
+* **Examples:** User authentication, global settings, persistent shopping carts, cached API data.
+* **Implementation:** Use **Pinia Store**.
+
+---
+
+## 2. Implementation & Mutation Rules
+
+### Mutation Management (The "How")
+* **Action-Only Updates:** Components should never mutate shared state directly.
+* **Pinia Standard:** Always define `actions` to modify the `state`. Components call `store.someAction()`, never `store.state = ...`.
+* **Provide/Inject Standard:** Always provide a `readonly()` version of the state and a separate function to update it.
+* **Single Source of Truth:** Ensure only the "Owner" (Store or Provider) contains the logic for state transitions.
+
+### Flow Management (The "Where")
+* **Avoid Prop Drilling:** Do not pass props through "Middleman" components that do not use the data. Use `Provide/Inject` instead.
+* **Store Discovery:** Do not use Pinia for UI states that are destroyed when the user leaves a page (e.g., a specific search filter that should reset).
+
+---
+
+## 3. Anti-Patterns to Prevent
+
+* **Direct Store Mutation:** Modifying Pinia state directly from a template or a component's setup.
+* **Global Over-Crowding:** Putting every `ref` into a Pinia store by default.
+* **Mutable Injections:** Injecting a raw `ref` and changing its `.value` inside a child component.
+* **Fragmented Logic:** Scattering state update logic across multiple components instead of keeping it in the Store/Provider.
+
+---
+
+## 4. Coding Standard Examples
+
+### Pattern: Protected Provide/Inject
+* **Provide:** `provide('user-theme', { theme: readonly(theme), toggleTheme });`
+* **Inject:** `const { theme, toggleTheme } = inject('user-theme');`
+
+### Pattern: Pinia Action Usage
+* **Correct:** `authStore.login(credentials);`
+* **Incorrect:** `authStore.isLoggedIn = true;`
