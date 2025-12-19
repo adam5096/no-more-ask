@@ -31,7 +31,6 @@
 - `Helper` - 專業的閒人
 - `WokeElder` - 覺醒的長輩
 - `SilentBuffer` - 夾心餅乾配偶
-- `FlexingLegend` - 炫耀型長輩
 - `UrbanLoner` - 節慶邊緣人
 
 ---
@@ -382,7 +381,6 @@ type UserRole =
   | 'Helper'         // 專業的閒人
   | 'WokeElder'      // 覺醒的長輩
   | 'SilentBuffer'   // 夾心餅乾配偶
-  | 'FlexingLegend'  // 炫耀型長輩
   | 'UrbanLoner'     // 節慶邊緣人
 ```
 
