@@ -864,3 +864,4 @@ interface GatheringDetailsResponse {
 **最後更新**：2024  
 **維護者**：待指定
 
+
