@@ -1,8 +1,48 @@
 # BFF 路徑設計文檔
 
-> **版本**：v1.0  
+> **版本**：v1.1（已對齊扁平化規則）  
 > **基於**：ORCA 分析文檔 v1.0  
-> **命名規則**：遵循 `.cursor/rules/routing/bff-path-guideline.mdc` 和 `.cursor/rules/routing/architectural-rules.mdc`
+> **命名規則**：遵循 `.cursor/rules/routing/bff-path-guideline.mdc`、`.cursor/rules/routing/architectural-rules.mdc`、`.cursor/rules/api/flattening-standards.mdc`
+
+---
+
+## API 設計原則
+
+### 資源命名規則
+- **複數名詞**：所有資源集合必須使用複數名詞（如 `/api/rescue-requests`、`/api/helpers`）
+- **扁平化結構**：路徑嵌套不超過 2 層
+- **查詢參數**：使用 query parameters 處理關係和篩選
+
+### HTTP 方法選擇
+
+#### 簡單狀態變更 → 使用 `PATCH`
+適用於：更新資源狀態、切換開關、修改屬性值
+
+範例：
+- `PATCH /api/rescue-requests/[id]` with `{ status: 'matched' }`（接受匹配）
+- `PATCH /api/rescue-requests/[id]` with `{ status: 'completed' }`（標記完成）
+- `PATCH /api/rescue-requests/[id]` with `{ rating: 5, review: '...' }`（評價）
+- `PATCH /api/helpers/[id]` with `{ status: 'online' }`（切換狀態）
+- `PATCH /api/notifications/[id]` with `{ isRead: true }`（標記已讀）
+- `PATCH /api/users/profile` with `{ role: 'Helper' }`（切換角色）
+
+#### 複雜業務流程 → 保留 `POST` action-oriented
+適用於：
+- 涉及多個資源的協調操作
+- 觸發計算、生成、轉換等非簡單更新
+- 創建衍生資源（如生成報告、腳本）
+- 涉及外部服務調用（如 AI 生成）
+
+範例：
+- `POST /api/response-kit/generate`（生成腳本，涉及邏輯處理）
+- `POST /api/diagnostic/start-test`（開始測驗，創建新資源並初始化）
+- `POST /api/diagnostic/submit-answers`（提交答案，觸發計算和報告生成）
+- `POST /api/gatherings`（創建聚會，標準 POST 創建資源）
+- `POST /api/venting/posts`（發布貼文，標準 POST 創建資源）
+
+#### 互動操作 → 視情況而定
+- **按讚/留言**：可視為創建互動記錄，使用 `POST /api/venting/posts/[id]/likes` 或 `PATCH /api/venting/posts/[id]` with `{ likes: +1 }`
+- **加入/退出聚會**：涉及多對多關係，可考慮 `POST /api/gatherings/[id]/participants` 或 `PATCH /api/gatherings/[id]` with `{ action: 'join' }`
 
 ---
 
@@ -21,10 +61,10 @@
 
 | 頁面 | 描述 | BFF 路徑 | 聚合邏輯 |
 |------|------|----------|----------|
-| 救援請求詳情頁 | 查看請求詳情 | `/api/rescue-request/[id]/details` | RescueRequest + Helper 資訊 + 地圖位置 |
-| Helper 個人檔案頁 | 查看 Helper 詳情 | `/api/helper/[id]/details` | Helper + 歷史業績 + 評價列表 |
-| 診斷報告頁面 | 查看診斷報告 | `/api/diagnostic-report/[id]/details` | DiagnosticReport + 處方箋內容 |
-| 聚會詳情頁 | 查看聚會詳情 | `/api/gathering/[id]/details` | Gathering + 參與者列表 + 地圖位置 |
+| 救援請求詳情頁 | 查看請求詳情 | `/api/rescue-requests/[id]/details` | RescueRequest + Helper 資訊 + 地圖位置 |
+| Helper 個人檔案頁 | 查看 Helper 詳情 | `/api/helpers/[id]/details` | Helper + 歷史業績 + 評價列表 |
+| 診斷報告頁面 | 查看診斷報告 | `/api/diagnostic-reports/[id]/details` | DiagnosticReport + 處方箋內容 |
+| 聚會詳情頁 | 查看聚會詳情 | `/api/gatherings/[id]/details` | Gathering + 參與者列表 + 地圖位置 |
 
 ### Complex Dashboard (1:N, N > 3) - 每個獨立區塊對應一個 BFF 路徑
 
@@ -48,7 +88,7 @@
 
 ### 用戶相關 (User)
 
-#### `GET /api/user/profile`
+#### `GET /api/users/profile`
 **描述**：獲取當前用戶的個人資料  
 **頁面對應**：個人設定頁  
 **複雜度**：Simple (1:1)  
@@ -60,7 +100,7 @@ interface UserProfileResponse {
 }
 ```
 
-#### `PUT /api/user/profile`
+#### `PATCH /api/users/profile`
 **描述**：更新用戶個人資料  
 **頁面對應**：個人設定頁  
 **複雜度**：Simple (1:1)  
@@ -72,20 +112,15 @@ interface UpdateUserProfileRequest {
   avatar?: string
   phone?: string
   location?: { lat: number; lng: number; address?: string }
+  role?: UserRole  // 切換角色
 }
 ```
-
-#### `POST /api/user/switch-role`
-**描述**：切換用戶角色  
-**頁面對應**：角色切換功能  
-**複雜度**：Simple (1:1)  
-**聚合邏輯**：更新 User.role
 
 ---
 
 ### 救援請求相關 (RescueRequest)
 
-#### `GET /api/rescue-request/[id]/details`
+#### `GET /api/rescue-requests/[id]/details`
 **描述**：獲取救援請求詳情（聚合 Helper 資訊與地圖位置）  
 **頁面對應**：救援請求詳情頁  
 **複雜度**：Standard (1:3)  
@@ -102,7 +137,7 @@ interface RescueRequestDetailsResponse {
 }
 ```
 
-#### `POST /api/rescue-request/create`
+#### `POST /api/rescue-requests`
 **描述**：建立新的救援請求  
 **頁面對應**：建立救援請求頁  
 **複雜度**：Simple (1:1)  
@@ -117,7 +152,7 @@ interface CreateRescueRequestRequest {
 }
 ```
 
-#### `GET /api/rescue-request/list`
+#### `GET /api/rescue-requests`
 **描述**：獲取救援請求列表（用於儀表板）  
 **頁面對應**：個人儀表板  
 **複雜度**：Simple (1:1)  
@@ -133,34 +168,28 @@ interface RescueRequestListResponse {
 }
 ```
 
-#### `POST /api/rescue-request/[id]/accept-match`
-**描述**：接受 Helper 匹配  
+#### `PATCH /api/rescue-requests/[id]`
+**描述**：更新救援請求狀態（接受匹配、標記完成、評價 Helper）  
 **頁面對應**：救援請求詳情頁  
-**複雜度**：Simple (1:1)  
-**聚合邏輯**：更新 RescueRequest 狀態 + 發送通知
-
-#### `POST /api/rescue-request/[id]/complete`
-**描述**：標記救援請求完成  
-**頁面對應**：救援請求詳情頁  
-**複雜度**：Simple (1:1)
-
-#### `POST /api/rescue-request/[id]/rate`
-**描述**：評價 Helper  
-**頁面對應**：救援請求完成頁  
 **複雜度**：Simple (1:1)  
 **請求格式**：
 ```typescript
-interface RateHelperRequest {
-  rating: number // 1-5
-  review?: string
+interface UpdateRescueRequestRequest {
+  status?: 'matched' | 'in-progress' | 'completed' | 'cancelled'  // 狀態變更
+  rating?: number  // 1-5，評價 Helper
+  review?: string  // 評價內容
 }
 ```
+**說明**：
+- 接受匹配：`{ status: 'matched' }`
+- 標記完成：`{ status: 'completed' }`
+- 評價 Helper：`{ rating: 5, review: '...' }`
 
 ---
 
 ### Helper 相關
 
-#### `GET /api/helper/[id]/details`
+#### `GET /api/helpers/[id]/details`
 **描述**：獲取 Helper 詳細資訊（聚合歷史業績與評價）  
 **頁面對應**：Helper 個人檔案頁  
 **複雜度**：Standard (1:3)  
@@ -177,7 +206,7 @@ interface HelperDetailsResponse {
 }
 ```
 
-#### `GET /api/helper/list`
+#### `GET /api/helpers`
 **描述**：獲取可用 Helper 列表（用於匹配）  
 **頁面對應**：救援請求匹配頁  
 **複雜度**：Simple (1:1)  
@@ -192,7 +221,7 @@ interface HelperListResponse {
 }
 ```
 
-#### `POST /api/helper/register`
+#### `POST /api/helpers`
 **描述**：註冊成為 Helper  
 **頁面對應**：Helper 註冊頁  
 **複雜度**：Simple (1:1)  
@@ -205,24 +234,22 @@ interface RegisterHelperRequest {
 }
 ```
 
-#### `PUT /api/helper/profile`
-**描述**：更新 Helper 個人檔案  
-**頁面對應**：Helper 設定頁  
-**複雜度**：Simple (1:1)
-
-#### `POST /api/helper/toggle-status`
-**描述**：切換 Helper 接案狀態  
-**頁面對應**：Helper 儀表板  
+#### `PATCH /api/helpers/[id]`
+**描述**：更新 Helper 個人檔案或狀態  
+**頁面對應**：Helper 設定頁、Helper 儀表板  
 **複雜度**：Simple (1:1)  
 **請求格式**：
 ```typescript
-interface ToggleHelperStatusRequest {
-  status: 'online' | 'offline' | 'busy'
+interface UpdateHelperRequest {
+  skills?: string[]
+  bio?: string
+  hourlyRate?: number
+  status?: 'online' | 'offline' | 'busy'  // 切換接案狀態
   availableUntil?: Date
 }
 ```
 
-#### `GET /api/helper/available-requests`
+#### `GET /api/helpers/available-requests`
 **描述**：獲取可接的救援請求列表  
 **頁面對應**：Helper 儀表板  
 **複雜度**：Simple (1:1)  
@@ -287,7 +314,7 @@ interface SubmitAnswersRequest {
 }
 ```
 
-#### `GET /api/diagnostic-report/[id]/details`
+#### `GET /api/diagnostic-reports/[id]/details`
 **描述**：獲取診斷報告詳情（包含處方箋）  
 **頁面對應**：診斷報告頁  
 **複雜度**：Standard (1:2)  
@@ -302,10 +329,17 @@ interface DiagnosticReportDetailsResponse {
 }
 ```
 
-#### `POST /api/diagnostic-report/[id]/share`
-**描述**：分享診斷報告  
+#### `PATCH /api/diagnostic-reports/[id]`
+**描述**：更新診斷報告分享設定  
 **頁面對應**：診斷報告頁  
-**複雜度**：Simple (1:1)
+**複雜度**：Simple (1:1)  
+**請求格式**：
+```typescript
+interface UpdateDiagnosticReportRequest {
+  isShared?: boolean
+  shareToken?: string
+}
+```
 
 ---
 
@@ -327,7 +361,7 @@ interface VentPostFeedResponse {
 }
 ```
 
-#### `POST /api/venting/post/create`
+#### `POST /api/venting/posts`
 **描述**：發布宣洩貼文  
 **頁面對應**：同溫層牆頁  
 **複雜度**：Simple (1:1)  
@@ -342,28 +376,29 @@ interface CreateVentPostRequest {
 }
 ```
 
-#### `POST /api/venting/post/[id]/like`
-**描述**：按讚貼文  
-**頁面對應**：同溫層牆頁  
-**複雜度**：Simple (1:1)
-
-#### `POST /api/venting/post/[id]/comment`
-**描述**：留言  
+#### `PATCH /api/venting/posts/[id]`
+**描述**：更新貼文（按讚、留言）  
 **頁面對應**：同溫層牆頁  
 **複雜度**：Simple (1:1)  
 **請求格式**：
 ```typescript
-interface CommentRequest {
-  content: string
-  isAnonymous: boolean
+interface UpdateVentPostRequest {
+  likes?: number  // 按讚（前端計算 +1）
+  comment?: {  // 新增留言
+    content: string
+    isAnonymous: boolean
+  }
 }
 ```
+**說明**：
+- 按讚：`{ likes: currentLikes + 1 }`
+- 留言：`{ comment: { content: '...', isAnonymous: false } }`
 
 ---
 
 ### 聚會相關 (Gathering)
 
-#### `GET /api/gathering/[id]/details`
+#### `GET /api/gatherings/[id]/details`
 **描述**：獲取聚會詳情（聚合參與者列表與地圖位置）  
 **頁面對應**：聚會詳情頁  
 **複雜度**：Standard (1:3)  
@@ -380,7 +415,7 @@ interface GatheringDetailsResponse {
 }
 ```
 
-#### `POST /api/gathering/create`
+#### `POST /api/gatherings`
 **描述**：發起聚會  
 **頁面對應**：發起聚會頁  
 **複雜度**：Simple (1:1)  
@@ -395,17 +430,23 @@ interface CreateGatheringRequest {
 }
 ```
 
-#### `POST /api/gathering/[id]/join`
-**描述**：加入聚會  
+#### `PATCH /api/gatherings/[id]`
+**描述**：更新聚會（加入、退出、取消）  
 **頁面對應**：聚會詳情頁  
-**複雜度**：Simple (1:1)
+**複雜度**：Simple (1:1)  
+**請求格式**：
+```typescript
+interface UpdateGatheringRequest {
+  action?: 'join' | 'leave'  // 加入或退出聚會
+  status?: 'cancelled'  // 取消聚會（僅發起者）
+}
+```
+**說明**：
+- 加入聚會：`{ action: 'join' }`
+- 退出聚會：`{ action: 'leave' }`
+- 取消聚會：`{ status: 'cancelled' }`（僅發起者）
 
-#### `POST /api/gathering/[id]/leave`
-**描述**：退出聚會  
-**頁面對應**：聚會詳情頁  
-**複雜度**：Simple (1:1)
-
-#### `GET /api/gathering/list`
+#### `GET /api/gatherings`
 **描述**：獲取聚會列表  
 **頁面對應**：聚會列表頁  
 **複雜度**：Simple (1:1)  
@@ -478,10 +519,16 @@ interface NotificationListResponse {
 }
 ```
 
-#### `POST /api/notifications/[id]/mark-read`
-**描述**：標記通知為已讀  
+#### `PATCH /api/notifications/[id]`
+**描述**：更新通知狀態（標記已讀）  
 **頁面對應**：通知中心  
-**複雜度**：Simple (1:1)
+**複雜度**：Simple (1:1)  
+**請求格式**：
+```typescript
+interface UpdateNotificationRequest {
+  isRead: boolean
+}
+```
 
 #### `PUT /api/notifications/preferences`
 **描述**：更新通知偏好設定  
@@ -592,7 +639,7 @@ interface DashboardInitDataResponse {
 
 ---
 
-**文檔版本**：v1.0  
+**文檔版本**：v1.1（已對齊扁平化規則）  
 **最後更新**：2024  
 **維護者**：待指定
 

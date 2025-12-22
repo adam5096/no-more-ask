@@ -29,5 +29,17 @@ export default defineNuxtConfig({
      * @default "@/components/ui"
      */
     componentDir: '@/components/ui'
+  },
+
+  // 運行時配置：Mock 資料切換機制
+  runtimeConfig: {
+    // 私有配置（僅在服務器端可用）
+    useMockData: process.env.USE_MOCK_DATA !== 'false', // 預設使用 Mock 資料
+    
+    // 公開配置（可在客戶端和服務器端使用）
+    public: {
+      apiBaseUrl: process.env.API_BASE_URL || '/api', // API 基礎路徑
+      useMockData: process.env.USE_MOCK_DATA !== 'false' // 預設使用 Mock 資料
+    }
   }
 })
