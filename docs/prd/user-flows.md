@@ -21,30 +21,30 @@
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> Login{已登入?}
-    Login -->|否| LoginPage[/login]
-    LoginPage --> Dashboard[/dashboard]
+    Start([進入系統]) --> Login{已登入}
+    Login -->|否| LoginPage[登入頁面]
+    LoginPage --> Dashboard[個人儀表板]
     Login -->|是| Dashboard
-    Dashboard --> CreateRequest[/rescue-request/create]
+    Dashboard --> CreateRequest[建立救援請求頁面]
     CreateRequest --> InputInfo[輸入壓力等級與預算]
     InputInfo --> SetLocation[設定地理位置]
     SetLocation --> Submit[提交請求]
-    Submit --> BFF1[POST /api/rescue-request/create]
+    Submit --> BFF1[POST api rescue request create]
     BFF1 --> RequestCreated[請求已建立]
-    RequestCreated --> ViewRequest[/rescue-request/[requestId]]
-    ViewRequest --> BFF2[GET /api/rescue-request/[id]/details]
+    RequestCreated --> ViewRequest[救援請求詳情頁面]
+    ViewRequest --> BFF2[GET api rescue request id details]
     BFF2 --> WaitMatch[等待匹配]
     WaitMatch --> MatchNotification[收到匹配通知]
-    MatchNotification --> BFF3[GET /api/notifications/list]
-    BFF3 --> ViewMatches[/rescue-request/[requestId]/match]
-    ViewMatches --> BFF4[GET /api/helper/list]
+    MatchNotification --> BFF3[GET api notifications list]
+    BFF3 --> ViewMatches[選擇 Helper 頁面]
+    ViewMatches --> BFF4[GET api helper list]
     BFF4 --> SelectHelper[選擇 Helper]
     SelectHelper --> AcceptMatch[接受匹配]
-    AcceptMatch --> BFF5[POST /api/rescue-request/[id]/accept-match]
+    AcceptMatch --> BFF5[POST api rescue request id accept match]
     BFF5 --> Matched[匹配成功]
     Matched --> Complete[完成救援]
     Complete --> Rate[評價 Helper]
-    Rate --> BFF6[POST /api/rescue-request/[id]/rate]
+    Rate --> BFF6[POST api rescue request id rate]
     BFF6 --> End([流程結束])
 ```
 
@@ -52,14 +52,14 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入應對錦囊]) --> ResponseKit[/response-kit]
+    Start([進入應對錦囊]) --> ResponseKit[應對錦囊頁面]
     ResponseKit --> InputQuestion[輸入長輩問話]
     InputQuestion --> Generate[生成腳本]
-    Generate --> BFF1[POST /api/response-kit/generate]
+    Generate --> BFF1[POST api response kit generate]
     BFF1 --> ViewScript[查看生成的腳本]
     ViewScript --> Copy[複製腳本]
-    Copy --> Save{是否收藏?}
-    Save -->|是| BFF2[POST /api/response-kit/[id]/save]
+    Copy --> Save{是否收藏}
+    Save -->|是| BFF2[POST api response kit id save]
     Save -->|否| End([流程結束])
     BFF2 --> End
 ```
@@ -68,14 +68,14 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> Diagnostic[/diagnostic]
+    Start([進入系統]) --> Diagnostic[角色診斷頁面]
     Diagnostic --> SelectTest[選擇晚輩端測驗]
-    SelectTest --> BFF1[POST /api/diagnostic/start-test]
+    SelectTest --> BFF1[POST api diagnostic start test]
     BFF1 --> AnswerQuestions[回答測驗問題]
     AnswerQuestions --> SubmitAnswers[提交答案]
-    SubmitAnswers --> BFF2[POST /api/diagnostic/submit-answers]
-    BFF2 --> ViewReport[/diagnostic/report/[reportId]]
-    ViewReport --> BFF3[GET /api/diagnostic-report/[id]/details]
+    SubmitAnswers --> BFF2[POST api diagnostic submit answers]
+    BFF2 --> ViewReport[診斷報告頁面]
+    ViewReport --> BFF3[GET api diagnostic report id details]
     BFF3 --> ViewShadowArea[查看心理陰影面積]
     ViewShadowArea --> ViewSocialLabel[查看社交標籤]
     ViewSocialLabel --> ViewPrescription[查看處方箋]
@@ -90,24 +90,24 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> RegisterHelper[/helper/register]
+    Start([進入系統]) --> RegisterHelper[Helper 註冊頁面]
     RegisterHelper --> InputSkills[輸入技能標籤]
     InputSkills --> InputBio[輸入個人簡介]
     InputBio --> SetRate[設定時薪]
     SetRate --> Submit[提交註冊]
-    Submit --> BFF1[POST /api/helper/register]
+    Submit --> BFF1[POST api helper register]
     BFF1 --> HelperRegistered[Helper 註冊成功]
-    HelperRegistered --> HelperDashboard[/helper/dashboard]
+    HelperRegistered --> HelperDashboard[Helper 儀表板]
     HelperDashboard --> ToggleStatus[切換為在線狀態]
-    ToggleStatus --> BFF2[POST /api/helper/toggle-status]
+    ToggleStatus --> BFF2[POST api helper toggle status]
     BFF2 --> ViewRequests[查看可接案件]
-    ViewRequests --> BFF3[GET /api/helper/available-requests]
+    ViewRequests --> BFF3[GET api helper available requests]
     BFF3 --> SelectRequest[選擇救援請求]
-    SelectRequest --> ViewDetails[/rescue-request/[requestId]]
-    ViewDetails --> BFF4[GET /api/rescue-request/[id]/details]
-    BFF4 --> Accept{是否接受?}
+    SelectRequest --> ViewDetails[救援請求詳情頁面]
+    ViewDetails --> BFF4[GET api rescue request id details]
+    BFF4 --> Accept{是否接受}
     Accept -->|是| AcceptRequest[接受請求]
-    AcceptRequest --> BFF5[POST /api/helper/accept-request]
+    AcceptRequest --> BFF5[POST api helper accept request]
     BFF5 --> InProgress[進行中]
     InProgress --> Complete[完成救援]
     Complete --> End([流程結束])
@@ -122,14 +122,14 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> Diagnostic[/diagnostic]
+    Start([進入系統]) --> Diagnostic[角色診斷頁面]
     Diagnostic --> SelectTest[選擇長輩端測驗]
-    SelectTest --> BFF1[POST /api/diagnostic/start-test]
+    SelectTest --> BFF1[POST api diagnostic start test]
     BFF1 --> AnswerQuestions[回答測驗問題]
     AnswerQuestions --> SubmitAnswers[提交答案]
-    SubmitAnswers --> BFF2[POST /api/diagnostic/submit-answers]
-    BFF2 --> ViewReport[/diagnostic/report/[reportId]]
-    ViewReport --> BFF3[GET /api/diagnostic-report/[id]/details]
+    SubmitAnswers --> BFF2[POST api diagnostic submit answers]
+    BFF2 --> ViewReport[診斷報告頁面]
+    ViewReport --> BFF3[GET api diagnostic report id details]
     BFF3 --> ViewPrescription[查看處方箋]
     ViewPrescription --> End([流程結束])
 ```
@@ -138,15 +138,15 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> BoundaryManual[/boundary-manual]
-    BoundaryManual --> BFF1[GET /api/boundary-manual/details]
+    Start([進入系統]) --> BoundaryManual[邊界說明書頁面]
+    BoundaryManual --> BFF1[GET api boundary manual details]
     BFF1 --> ViewBoundary[查看邊界說明書]
     ViewBoundary --> ViewAcceptedTopics[查看接受話題列表]
     ViewAcceptedTopics --> ViewRejectedTopics[查看不接受話題列表]
-    ViewRejectedTopics --> Share{是否分享?}
+    ViewRejectedTopics --> Share{是否分享}
     Share -->|是| GenerateUrl[生成分享 URL]
     Share -->|否| End([流程結束])
-    GenerateUrl --> BFF2[POST /api/boundary-manual/generate-share-url]
+    GenerateUrl --> BFF2[POST api boundary manual generate share url]
     BFF2 --> ShareUrl[獲得分享連結]
     ShareUrl --> ShareToContacts[分享給親友]
     ShareToContacts --> End
@@ -160,18 +160,18 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> Dashboard[/dashboard]
-    Dashboard --> CreateRequest[/rescue-request/create]
+    Start([進入系統]) --> Dashboard[個人儀表板]
+    Dashboard --> CreateRequest[建立救援請求頁面]
     CreateRequest --> InputInfo[輸入需求]
     InputInfo --> SubmitRequest[提交請求]
-    SubmitRequest --> BFF1[POST /api/rescue-request/create]
-    BFF1 --> ResponseKit[/response-kit]
+    SubmitRequest --> BFF1[POST api rescue request create]
+    BFF1 --> ResponseKit[應對錦囊頁面]
     ResponseKit --> GenerateScript[生成應對腳本]
-    GenerateScript --> BFF2[POST /api/response-kit/generate]
+    GenerateScript --> BFF2[POST api response kit generate]
     BFF2 --> UseScript[使用腳本應對]
-    UseScript --> Venting[/venting]
+    UseScript --> Venting[同溫層牆頁面]
     Venting --> CreatePost[發布宣洩貼文]
-    CreatePost --> BFF3[POST /api/venting/post/create]
+    CreatePost --> BFF3[POST api venting post create]
     BFF3 --> End([流程結束])
 ```
 
@@ -179,20 +179,20 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> Venting[/venting]
-    Venting --> BFF1[GET /api/venting/feed]
+    Start([進入系統]) --> Venting[同溫層牆頁面]
+    Venting --> BFF1[GET api venting feed]
     BFF1 --> ViewPosts[查看貼文流]
     ViewPosts --> CreatePost[發布貼文]
-    CreatePost --> SetAnonymous{是否匿名?}
+    CreatePost --> SetAnonymous{是否匿名}
     SetAnonymous -->|是| SetAnonymousTrue[設定為匿名]
     SetAnonymous -->|否| SetAnonymousFalse[設定為公開]
     SetAnonymousTrue --> InputContent[輸入貼文內容]
     SetAnonymousFalse --> InputContent
-    InputContent --> UploadImages{是否上傳圖片?}
+    InputContent --> UploadImages{是否上傳圖片}
     UploadImages -->|是| Upload[上傳圖片]
     UploadImages -->|否| Submit[提交貼文]
     Upload --> Submit
-    Submit --> BFF2[POST /api/venting/post/create]
+    Submit --> BFF2[POST api venting post create]
     BFF2 --> PostCreated[貼文已發布]
     PostCreated --> ViewMyPost[查看我的貼文]
     ViewMyPost --> End([流程結束])
@@ -206,21 +206,21 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> Map[/map]
-    Map --> BFF1[GET /api/map/init-data]
+    Start([進入系統]) --> Map[實況地圖頁面]
+    Map --> BFF1[GET api map init data]
     BFF1 --> ViewLoners[查看邊緣人座標]
-    ViewLoners --> BFF2[GET /api/map/loners]
-    BFF2 --> CreateGathering[/gathering/create]
+    ViewLoners --> BFF2[GET api map loners]
+    BFF2 --> CreateGathering[發起聚會頁面]
     CreateGathering --> SetLocation[設定地點]
     SetLocation --> SetTime[設定時間]
     SetTime --> SetMax[設定人數上限]
     SetMax --> Submit[提交]
-    Submit --> BFF3[POST /api/gathering/create]
-    BFF3 --> ViewGathering[/gathering/[gatheringId]]
-    ViewGathering --> BFF4[GET /api/gathering/[id]/details]
-    BFF4 --> Venting[/venting]
+    Submit --> BFF3[POST api gathering create]
+    BFF3 --> ViewGathering[聚會詳情頁面]
+    ViewGathering --> BFF4[GET api gathering id details]
+    BFF4 --> Venting[同溫層牆頁面]
     Venting --> CreatePost[發布貼文宣傳聚會]
-    CreatePost --> BFF5[POST /api/venting/post/create]
+    CreatePost --> BFF5[POST api venting post create]
     BFF5 --> WaitJoin[等待參與者加入]
     WaitJoin --> End([流程結束])
 ```
@@ -229,16 +229,16 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> GatheringList[/gathering/list]
-    GatheringList --> BFF1[GET /api/gathering/list]
+    Start([進入系統]) --> GatheringList[聚會列表頁面]
+    GatheringList --> BFF1[GET api gathering list]
     BFF1 --> Filter[篩選聚會]
-    Filter --> ViewDetails[/gathering/[gatheringId]]
-    ViewDetails --> BFF2[GET /api/gathering/[id]/details]
-    BFF2 --> CheckStatus{聚會狀態?}
+    Filter --> ViewDetails[聚會詳情頁面]
+    ViewDetails --> BFF2[GET api gathering id details]
+    BFF2 --> CheckStatus{聚會狀態}
     CheckStatus -->|開放| Join[加入聚會]
     CheckStatus -->|已滿| WaitList[加入候補]
     CheckStatus -->|已取消| Back[返回列表]
-    Join --> BFF3[POST /api/gathering/[id]/join]
+    Join --> BFF3[POST api gathering id join]
     BFF3 --> Joined[已加入]
     Joined --> End([流程結束])
     WaitList --> End
@@ -249,8 +249,8 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入系統]) --> LiveMap[/map]
-    LiveMap --> BFF1[GET /api/map/init-data]
+    Start([進入系統]) --> LiveMap[實況地圖頁面]
+    LiveMap --> BFF1[GET api map init data]
     BFF1 --> ViewMap[查看地圖]
     ViewMap --> ToggleLayers[切換圖層]
     ToggleLayers --> ViewRescuePoints[顯示救援點]
@@ -271,12 +271,12 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([收到通知]) --> NotificationCenter[/notifications]
-    NotificationCenter --> BFF1[GET /api/notifications/list]
+    Start([收到通知]) --> NotificationCenter[通知中心頁面]
+    NotificationCenter --> BFF1[GET api notifications list]
     BFF1 --> ViewList[查看通知列表]
     ViewList --> ClickNotification[點擊通知]
     ClickNotification --> MarkRead[標記為已讀]
-    MarkRead --> BFF2[POST /api/notifications/[id]/mark-read]
+    MarkRead --> BFF2[POST api notifications id mark read]
     BFF2 --> Navigate[導航到相關頁面]
     Navigate --> End([流程結束])
 ```
@@ -285,11 +285,11 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Start([進入邊界說明書]) --> BoundaryManual[/boundary-manual]
-    BoundaryManual --> BFF1[GET /api/boundary-manual/details]
-    BFF1 --> SelectTopics[勾選接受/不接受的話題]
+    Start([進入邊界說明書]) --> BoundaryManual[邊界說明書頁面]
+    BoundaryManual --> BFF1[GET api boundary manual details]
+    BFF1 --> SelectTopics[勾選接受或不接受的話題]
     SelectTopics --> Update[更新清單]
-    Update --> BFF2[PUT /api/boundary-manual/update]
+    Update --> BFF2[PUT api boundary manual update]
     BFF2 --> GenerateUrl[生成分享 URL]
     GenerateUrl --> Share[分享給親友]
     Share --> End([流程結束])
@@ -345,10 +345,10 @@ flowchart TD
 ```mermaid
 flowchart TD
     Start([API 請求]) --> Request[發送請求]
-    Request --> Success{請求成功?}
+    Request --> Success{請求成功}
     Success -->|是| Process[處理回應]
-    Success -->|否| CheckError{錯誤類型?}
-    CheckError -->|401 未授權| RedirectLogin[/login]
+    Success -->|否| CheckError{錯誤類型}
+    CheckError -->|401 未授權| RedirectLogin[登入頁面]
     CheckError -->|403 無權限| ShowError[顯示權限錯誤]
     CheckError -->|404 不存在| ShowNotFound[顯示不存在]
     CheckError -->|500 伺服器錯誤| ShowServerError[顯示伺服器錯誤]
@@ -356,7 +356,7 @@ flowchart TD
     RedirectLogin --> End([流程結束])
     ShowError --> End
     ShowNotFound --> End
-    ShowServerError --> Retry{是否重試?}
+    ShowServerError --> Retry{是否重試}
     Retry -->|是| Request
     Retry -->|否| End
     ShowNetworkError --> Retry
