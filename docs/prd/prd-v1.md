@@ -14,7 +14,7 @@
 3. [功能清單（Feature List）](#功能清單feature-list)
 4. [功能分解圖（Functional Decomposition Diagram）](#功能分解圖functional-decomposition-diagram)
 5. [功能流程圖（User Flows）](#功能流程圖user-flows)
-6. [功能結構圖（Information Architecture）](#功能結構圖information-architecture)
+6. [Site Map 與資訊架構（Site Map & Information Architecture）](#site-map-與資訊架構site-map--information-architecture)
 7. [Wireframe 與 UI 規格（設計規格）](#wireframe-與-ui-規格設計規格)
 8. [技術規格（工程規格）](#技術規格工程規格)
 9. [MVP 決策記錄](#mvp-決策記錄)
@@ -371,7 +371,123 @@ flowchart TD
 
 ---
 
-## 功能結構圖（Information Architecture）
+## Site Map 與資訊架構（Site Map & Information Architecture）
+
+> **詳細資訊架構**：完整的 Site Map（包含路由細節）、導航結構規劃、麵包屑設計等，請參考 [`docs/information-architecture.md`](../information-architecture.md)
+
+### Site Map 摘要
+
+Site Map 展示網站所有頁面的層次結構與組織方式，幫助理解整體頁面架構與功能模組關係。
+
+#### 視覺化 Site Map
+
+```mermaid
+graph TD
+    Home[首頁] --> Auth[認證系統 MVP]
+    Home --> Dashboard[個人儀表板 MVP]
+    Home --> Rescue[救援功能 B1 MVP]
+    Home --> Helper[Helper 功能 B4 MVP]
+    Home --> Notification[通知系統 B7 MVP]
+    Home --> ResponseKit[應對錦囊 B2 MVP]
+    Home --> Venting[同溫層牆 B5 MVP]
+    Home --> Diagnostic[角色診斷 B3 Phase2]
+    Home --> LiveMap[實況地圖 B6 Phase2]
+    Home --> Boundary[邊界說明書 B8 Phase2]
+    
+    Auth --> Login[登入]
+    Auth --> Register[註冊]
+    
+    Dashboard --> DashboardPage[個人儀表板]
+    Dashboard --> Profile[個人資料]
+    Dashboard --> Notifications[通知中心]
+    
+    Rescue --> CreateRequest[建立救援請求]
+    Rescue --> RequestDetail[救援請求詳情]
+    Rescue --> RequestMatch[選擇 Helper]
+    
+    Helper --> HelperRegister[Helper 註冊]
+    Helper --> HelperProfile[Helper 檔案]
+    Helper --> HelperSettings[Helper 設定]
+    Helper --> HelperDashboard[Helper 儀表板]
+    
+    ResponseKit --> ResponseKitPage[應對錦囊]
+    
+    Venting --> VentingFeed[貼文流]
+    Venting --> CreateGathering[發起聚會]
+    Venting --> GatheringList[聚會列表]
+    Venting --> GatheringDetail[聚會詳情]
+    
+    Diagnostic --> DiagnosticStart[開始測驗]
+    Diagnostic --> DiagnosticReport[診斷報告]
+    
+    LiveMap --> MapPage[實況地圖]
+    
+    Boundary --> BoundaryManual[邊界說明書]
+    Boundary --> BoundaryShare[分享頁]
+    
+    style Home fill:#e1f5ff
+    style Auth fill:#fff4e1
+    style Rescue fill:#ffe1e1
+    style Helper fill:#e1ffe1
+    style Dashboard fill:#f0e1ff
+    style Notification fill:#ffe1f0
+    style ResponseKit fill:#e1ffff
+    style Venting fill:#ffffe1
+    style Diagnostic fill:#e1e1ff
+    style LiveMap fill:#ffe1ff
+    style Boundary fill:#e1ffe1
+```
+
+#### 頁面列表摘要
+
+| 頁面名稱 | 功能描述 | 優先級 | 狀態 | 所屬功能模組 |
+|---------|---------|--------|------|------------|
+| **首頁** | 首頁/登陸頁 | P0 | MVP | - |
+| **登入** | 用戶身份認證 | P0 | MVP | 認證系統 |
+| **註冊** | 用戶註冊 | P0 | MVP | 認證系統 |
+| **個人儀表板** | 用戶主頁，整合個人資訊 | P0 | MVP | 個人儀表板 |
+| **個人資料** | 個人資料設定 | P0 | MVP | 個人儀表板 |
+| **通知中心** | 系統通知管理 | P0 | MVP | 通知系統 |
+| **通知設定** | 通知偏好設定 | P0 | MVP | 通知系統 |
+| **建立救援請求** | 發起救援需求 | P0 | MVP | 救援功能 |
+| **救援請求詳情** | 查看請求狀態與 Helper 資訊 | P0 | MVP | 救援功能 |
+| **選擇 Helper** | 選擇匹配的 Helper | P0 | MVP | 救援功能 |
+| **Helper 註冊** | 註冊成為 Helper | P0 | MVP | Helper 功能 |
+| **Helper 檔案** | Helper 個人檔案與業績 | P0 | MVP | Helper 功能 |
+| **Helper 設定** | Helper 狀態與技能管理 | P0 | MVP | Helper 功能 |
+| **Helper 儀表板** | Helper 接案管理 | P0 | MVP | Helper 功能 |
+| **應對錦囊** | 生成應對腳本 | P1 | MVP | 應對錦囊 |
+| **貼文流** | 同溫層牆貼文流 | P1 | MVP | 同溫層牆 |
+| **發起聚會** | 發起節慶聚會 | P1 | MVP | 同溫層牆 |
+| **聚會列表** | 瀏覽可用聚會 | P1 | MVP | 同溫層牆 |
+| **聚會詳情** | 查看聚會資訊與參與者 | P1 | MVP | 同溫層牆 |
+| **開始測驗** | 角色診斷測驗 | P2 | Phase 2 | 角色診斷 |
+| **診斷報告** | 查看診斷結果 | P2 | Phase 2 | 角色診斷 |
+| **實況地圖** | 地圖視覺化中心 | P2 | Phase 2 | 實況地圖 |
+| **邊界說明書** | 個人社交邊界管理 | P2 | Phase 2 | 邊界說明書 |
+| **邊界分享頁** | 邊界說明書分享頁（公開） | P2 | Phase 2 | 邊界說明書 |
+
+#### 頁面優先級摘要
+
+**MVP 核心頁面（優先級 P0）**：
+- 認證系統：登入、註冊
+- 個人儀表板：個人儀表板、個人資料
+- 通知系統：通知中心
+- 救援功能：建立救援請求、救援請求詳情、選擇 Helper
+- Helper 功能：Helper 註冊、Helper 檔案、Helper 設定、Helper 儀表板
+
+**MVP 次要頁面（優先級 P1）**：
+- 應對錦囊：應對錦囊
+- 同溫層牆：貼文流、發起聚會、聚會列表、聚會詳情
+
+**Phase 2 頁面（優先級 P2）**：
+- 角色診斷：開始測驗、診斷報告
+- 實況地圖：實況地圖
+- 邊界說明書：邊界說明書、邊界分享頁
+
+> **路由細節**：頁面的具體路由路徑請參考 [`docs/information-architecture.md`](../information-architecture.md) 中的完整 Site Map 表格，或 [`docs/construction/page-routes.md`](../construction/page-routes.md) 中的路由設計文檔。
+
+---
 
 ### 導航結構
 
@@ -398,34 +514,36 @@ flowchart TD
 
 ### 頁面組織架構
 
+> **詳細頁面組織**：包含路由細節的完整頁面組織架構，請參考 [`docs/information-architecture.md`](../information-architecture.md)
+
 #### 第一層：主要功能區塊
 
 1. **首頁與認證**
-   - `/` - 首頁/登陸頁
-   - `/login` - 登入
-   - `/register` - 註冊
+   - 首頁/登陸頁
+   - 登入
+   - 註冊
 
 2. **個人中心**
-   - `/dashboard` - 個人儀表板
-   - `/profile` - 個人資料設定
-   - `/notifications` - 通知中心
+   - 個人儀表板
+   - 個人資料設定
+   - 通知中心
 
 3. **救援功能區（B1 避難中心）**
-   - `/rescue-request/create` - 建立救援請求
-   - `/rescue-request/[requestId]` - 救援請求詳情
+   - 建立救援請求
+   - 救援請求詳情
 
 4. **防禦工具區（B2 應對錦囊）**
-   - `/response-kit` - 應對錦囊
+   - 應對錦囊
 
 5. **Helper 服務區（B4 英雄榜）**
-   - `/helper/register` - 註冊成為 Helper
-   - `/helper/[helperId]` - Helper 個人檔案
-   - `/helper/dashboard` - Helper 儀表板
+   - Helper 註冊
+   - Helper 個人檔案
+   - Helper 儀表板
 
 6. **社群互動區（B5 同溫層牆）**
-   - `/venting` - 同溫層牆（貼文流）
-   - `/gathering/create` - 發起聚會
-   - `/gathering/[gatheringId]` - 聚會詳情
+   - 同溫層牆（貼文流）
+   - 發起聚會
+   - 聚會詳情
 
 ### 用戶角色導航差異
 
@@ -807,7 +925,7 @@ flowchart TD
 
 - **ORCA 分析文檔**：[`docs/orca/orca-analysis-v1.md`](../orca/orca-analysis-v1.md)
 - **Wireframe 文檔**：[`docs/wireframes-v2.md`](../wireframes-v2.md)
-- **資訊架構**：[`docs/information-architecture.md`](../information-architecture.md)
+- **資訊架構與 Site Map**：[`docs/information-architecture.md`](../information-architecture.md) - 完整的 Site Map（包含路由細節）、導航結構規劃、麵包屑設計
 - **用戶流程**：[`docs/user-flows.md`](../user-flows.md)
 - **BFF 路徑設計**：[`docs/bff-paths.md`](../bff-paths.md)
 - **資料需求**：[`docs/data-requirements.md`](../data-requirements.md)

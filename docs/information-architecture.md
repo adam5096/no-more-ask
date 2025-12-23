@@ -33,6 +33,154 @@
 
 ---
 
+## Site Map（網站地圖）
+
+### Site Map 說明
+
+Site Map（網站地圖）是網站所有頁面的完整列表與層次結構圖，用於：
+- **理解頁面結構**：清晰展示所有頁面的層次關係與組織方式
+- **規劃開發範圍**：識別頁面的優先級與開發順序
+- **溝通對齊**：幫助設計師與工程師理解頁面結構與導航路徑
+
+**與導航結構的關係**：
+- **導航結構**：展示用戶可見的導航選單與入口
+- **Site Map**：展示所有頁面的完整列表，包含技術細節（路由）
+
+**閱讀方式**：
+- 視覺化圖表：展示頁面的層次關係與功能模組分組
+- 頁面列表表格：提供完整的頁面資訊，包含路由、優先級、狀態等
+
+### 視覺化 Site Map
+
+```mermaid
+graph TD
+    Home[首頁 /] --> Auth[認證系統 MVP]
+    Home --> Dashboard[個人儀表板 MVP]
+    Home --> Rescue[救援功能 B1 MVP]
+    Home --> Helper[Helper 功能 B4 MVP]
+    Home --> Notification[通知系統 B7 MVP]
+    Home --> ResponseKit[應對錦囊 B2 MVP]
+    Home --> Venting[同溫層牆 B5 MVP]
+    Home --> Diagnostic[角色診斷 B3 Phase2]
+    Home --> LiveMap[實況地圖 B6 Phase2]
+    Home --> Boundary[邊界說明書 B8 Phase2]
+    
+    Auth --> Login[登入 /login]
+    Auth --> Register[註冊 /register]
+    
+    Dashboard --> DashboardPage[個人儀表板 /dashboard]
+    Dashboard --> Profile[個人資料 /profile]
+    Dashboard --> Notifications[通知中心 /notifications]
+    Dashboard --> NotificationSettings[通知設定 /notifications/settings]
+    
+    Rescue --> CreateRequest[建立救援請求 /rescue-request/create]
+    Rescue --> RequestDetail[救援請求詳情 /rescue-request/requestId]
+    Rescue --> RequestMatch[選擇 Helper /rescue-request/requestId/match]
+    
+    Helper --> HelperRegister[Helper 註冊 /helper/register]
+    Helper --> HelperProfile[Helper 檔案 /helper/helperId]
+    Helper --> HelperSettings[Helper 設定 /helper/settings]
+    Helper --> HelperDashboard[Helper 儀表板 /helper/dashboard]
+    
+    ResponseKit --> ResponseKitPage[應對錦囊 /response-kit]
+    
+    Venting --> VentingFeed[貼文流 /venting]
+    Venting --> CreateGathering[發起聚會 /gathering/create]
+    Venting --> GatheringList[聚會列表 /gathering/list]
+    Venting --> GatheringDetail[聚會詳情 /gathering/gatheringId]
+    
+    Diagnostic --> DiagnosticStart[開始測驗 /diagnostic]
+    Diagnostic --> DiagnosticReport[診斷報告 /diagnostic/report/reportId]
+    
+    LiveMap --> MapPage[實況地圖 /map]
+    
+    Boundary --> BoundaryManual[邊界說明書 /boundary-manual]
+    Boundary --> BoundaryShare[分享頁 /boundary/shareToken]
+    
+    style Home fill:#e1f5ff
+    style Auth fill:#fff4e1
+    style Rescue fill:#ffe1e1
+    style Helper fill:#e1ffe1
+    style Dashboard fill:#f0e1ff
+    style Notification fill:#ffe1f0
+    style ResponseKit fill:#e1ffff
+    style Venting fill:#ffffe1
+    style Diagnostic fill:#e1e1ff
+    style LiveMap fill:#ffe1ff
+    style Boundary fill:#e1ffe1
+```
+
+### 完整頁面列表表格
+
+| 頁面名稱 | 路由 | 功能描述 | 優先級 | 狀態 | 所屬功能模組 | 相關板塊 |
+|---------|------|---------|--------|------|------------|---------|
+| **首頁** | `/` | 首頁/登陸頁 | P0 | MVP | - | - |
+| **登入** | `/login` | 用戶身份認證 | P0 | MVP | 認證系統 | - |
+| **註冊** | `/register` | 用戶註冊 | P0 | MVP | 認證系統 | - |
+| **個人儀表板** | `/dashboard` | 用戶主頁，整合個人資訊 | P0 | MVP | 個人儀表板 | - |
+| **個人資料** | `/profile` | 個人資料設定 | P0 | MVP | 個人儀表板 | - |
+| **通知中心** | `/notifications` | 系統通知管理 | P0 | MVP | 通知系統 | B7 |
+| **通知設定** | `/notifications/settings` | 通知偏好設定 | P0 | MVP | 通知系統 | B7 |
+| **建立救援請求** | `/rescue-request/create` | 發起救援需求 | P0 | MVP | 救援功能 | B1 |
+| **救援請求詳情** | `/rescue-request/[requestId]` | 查看請求狀態與 Helper 資訊 | P0 | MVP | 救援功能 | B1 |
+| **選擇 Helper** | `/rescue-request/[requestId]/match` | 選擇匹配的 Helper | P0 | MVP | 救援功能 | B1 |
+| **Helper 註冊** | `/helper/register` | 註冊成為 Helper | P0 | MVP | Helper 功能 | B4 |
+| **Helper 檔案** | `/helper/[helperId]` | Helper 個人檔案與業績 | P0 | MVP | Helper 功能 | B4 |
+| **Helper 設定** | `/helper/settings` | Helper 狀態與技能管理 | P0 | MVP | Helper 功能 | B4 |
+| **Helper 儀表板** | `/helper/dashboard` | Helper 接案管理 | P0 | MVP | Helper 功能 | B4 |
+| **應對錦囊** | `/response-kit` | 生成應對腳本 | P1 | MVP | 應對錦囊 | B2 |
+| **貼文流** | `/venting` | 同溫層牆貼文流 | P1 | MVP | 同溫層牆 | B5 |
+| **發起聚會** | `/gathering/create` | 發起節慶聚會 | P1 | MVP | 同溫層牆 | B5 |
+| **聚會列表** | `/gathering/list` | 瀏覽可用聚會 | P1 | MVP | 同溫層牆 | B5 |
+| **聚會詳情** | `/gathering/[gatheringId]` | 查看聚會資訊與參與者 | P1 | MVP | 同溫層牆 | B5 |
+| **開始測驗** | `/diagnostic` | 角色診斷測驗 | P2 | Phase 2 | 角色診斷 | B3 |
+| **診斷報告** | `/diagnostic/report/[reportId]` | 查看診斷結果 | P2 | Phase 2 | 角色診斷 | B3 |
+| **實況地圖** | `/map` | 地圖視覺化中心 | P2 | Phase 2 | 實況地圖 | B6 |
+| **邊界說明書** | `/boundary-manual` | 個人社交邊界管理 | P2 | Phase 2 | 邊界說明書 | B8 |
+| **邊界分享頁** | `/boundary/[shareToken]` | 邊界說明書分享頁（公開） | P2 | Phase 2 | 邊界說明書 | B8 |
+
+### 頁面狀態對照表
+
+#### MVP 核心頁面（優先級 P0）
+
+| 頁面名稱 | 路由 | 所屬功能模組 |
+|---------|------|------------|
+| 登入 | `/login` | 認證系統 |
+| 註冊 | `/register` | 認證系統 |
+| 個人儀表板 | `/dashboard` | 個人儀表板 |
+| 個人資料 | `/profile` | 個人儀表板 |
+| 通知中心 | `/notifications` | 通知系統 |
+| 通知設定 | `/notifications/settings` | 通知系統 |
+| 建立救援請求 | `/rescue-request/create` | 救援功能 |
+| 救援請求詳情 | `/rescue-request/[requestId]` | 救援功能 |
+| 選擇 Helper | `/rescue-request/[requestId]/match` | 救援功能 |
+| Helper 註冊 | `/helper/register` | Helper 功能 |
+| Helper 檔案 | `/helper/[helperId]` | Helper 功能 |
+| Helper 設定 | `/helper/settings` | Helper 功能 |
+| Helper 儀表板 | `/helper/dashboard` | Helper 功能 |
+
+#### MVP 次要頁面（優先級 P1）
+
+| 頁面名稱 | 路由 | 所屬功能模組 |
+|---------|------|------------|
+| 應對錦囊 | `/response-kit` | 應對錦囊 |
+| 貼文流 | `/venting` | 同溫層牆 |
+| 發起聚會 | `/gathering/create` | 同溫層牆 |
+| 聚會列表 | `/gathering/list` | 同溫層牆 |
+| 聚會詳情 | `/gathering/[gatheringId]` | 同溫層牆 |
+
+#### Phase 2 頁面（優先級 P2）
+
+| 頁面名稱 | 路由 | 所屬功能模組 |
+|---------|------|------------|
+| 開始測驗 | `/diagnostic` | 角色診斷 |
+| 診斷報告 | `/diagnostic/report/[reportId]` | 角色診斷 |
+| 實況地圖 | `/map` | 實況地圖 |
+| 邊界說明書 | `/boundary-manual` | 邊界說明書 |
+| 邊界分享頁 | `/boundary/[shareToken]` | 邊界說明書 |
+
+---
+
 ## 頁面組織架構
 
 ### 第一層：主要功能區塊
